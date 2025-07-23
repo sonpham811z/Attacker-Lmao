@@ -34,7 +34,7 @@ const slideIn = keyframes`
   }
 `
 
-const ApplyFundingCard = () => {
+const ApplyFundingCard = ({ onGetStarted }) => {
   return (
     <Card
       sx={{
@@ -189,6 +189,7 @@ const ApplyFundingCard = () => {
                   transform: "translateY(0px)",
                 },
               }}
+              onClick={onGetStarted}
             >
               Get Started
             </Button>
