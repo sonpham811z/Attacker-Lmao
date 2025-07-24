@@ -1,6 +1,13 @@
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
 import Dashboard from "./pages/Dashboard"
+import Register from './pages/Auth/Register/Register'
+import BorrowerRegister from './pages/Auth/Register/BorrowerRegister'
+import LenderRegister from './pages/Auth/Register/LenderRegister'
+import VerifierRegister from './pages/Auth/Register/VerifierRegister'
+import { Route, BrowserRouter, Routes } from "react-router-dom"
+import Login from "./pages/Auth/Login/Login"
+import OTPVerification from "./pages/Auth/OTPVerification"
 
 const theme = createTheme({
   palette: {
@@ -27,7 +34,7 @@ const theme = createTheme({
             height: '3px',
           },
           '*::-webkit-scrollbar-track': {
-            marign: '2px'
+            margin: '2px'
           },
           '*::-webkit-scrollbar-thumb': {
             backgroundColor: '#a3a0a0'
@@ -44,9 +51,20 @@ const theme = createTheme({
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Dashboard />
-    </ThemeProvider>
+    <CssBaseline />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/register/borrower" element={<BorrowerRegister />} />
+        <Route path="/register/lender" element={<LenderRegister />} />
+        <Route path="/register/verifier" element={<VerifierRegister />} />
+        <Route path="/verify-otp" element={<OTPVerification />} />
+      </Routes>
+    </BrowserRouter>
+  </ThemeProvider>
   )
 }
 
