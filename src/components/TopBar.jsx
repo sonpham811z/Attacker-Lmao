@@ -11,6 +11,7 @@ import {
 } from "@mui/icons-material"
 import { useState } from "react"
 import { keyframes } from "@mui/system"
+import { useLocation } from "react-router-dom"
 
 const pulse = keyframes`
   0% {
@@ -45,9 +46,22 @@ const textGlow = keyframes`
   }
 `
 
+const PAGE_TITLES = {
+  "/": "Lender",
+  "/loan-requests": "Lender",
+  "/loans": "Loans",
+  "/submit": "Submit Another Deal",
+  "/credit-score": "Credit Score",
+  "/support": "Contact Support",
+  "/deals-room": "Deals Room",
+  "/monitor": "Lịch sử giao dịch On-chain",
+};
+
 const TopBar = () => {
   const [walletConnected, setWalletConnected] = useState(false)
   const [walletAddress, setWalletAddress] = useState("")
+  const location = useLocation();
+  const pageTitle = PAGE_TITLES[location.pathname] || "";
 
   const connectWallet = async () => {
     if (typeof window.ethereum !== "undefined") {
@@ -90,7 +104,7 @@ const TopBar = () => {
       }}
     >
       <Toolbar sx={{ justifyContent: "space-between", width: "100%", py: 1.5 }}>
-        {/* Left Section - Enhanced Dashboard Title */}
+        {/* Left Section - Enhanced Title */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
           <Box sx={{ position: "relative" }}>
             <Typography
@@ -106,7 +120,7 @@ const TopBar = () => {
                 letterSpacing: "-0.5px",
                 animation: `${textGlow} 4s ease-in-out infinite`,
                 "&::before": {
-                  content: '"Dashboard"',
+                  content: `"${pageTitle}"`,
                   position: "absolute",
                   top: 0,
                   left: 0,
@@ -130,9 +144,8 @@ const TopBar = () => {
                 },
               }}
             >
-              Dashboard
+              {pageTitle}
             </Typography>
-            
           </Box>
         </Box>
 

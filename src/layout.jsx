@@ -1,6 +1,15 @@
-import { ThemeProvider } from "@mui/material/styles"
-import CssBaseline from "@mui/material/CssBaseline"
-import { createTheme } from "@mui/material/styles"
+import LoanRequests from "./pages/LoanRequests";
+import React from "react";
+import Loans from "./pages/Loans";
+import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import { createTheme } from "@mui/material/styles";
+import { Routes, Route, useLocation } from "react-router-dom";
+import Dashboard from "./pages/Dashboard";
+import TransactionMonitor from "./pages/TransactionMonitor";
+import Sidebar from "./components/Sidebar";
+import Box from "@mui/material/Box";
+
 
 const theme = createTheme({
   palette: {
@@ -32,17 +41,26 @@ const theme = createTheme({
       },
     },
   },
-})
+});
 
-export default function RootLayout({ children }) {
+export default function RootLayout() {
+  const location = useLocation();
+
   return (
-    <html lang="en">
-      <body>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          {children}
-        </ThemeProvider>
-      </body>
-    </html>
-  )
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#f8fafc" }}>
+        <Sidebar currentPath={location.pathname} />
+        <Box component="main" sx={{ flexGrow: 1, width: "100%", minWidth: 0 }}>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/monitor" element={<TransactionMonitor />} />
+            <Route path="/loans" element={<React.Suspense fallback={null}><Loans /></React.Suspense>} />
+            <Route path="/loan-requests" element={<LoanRequests />} />
+            {/* Thêm các route khác nếu có */}
+          </Routes>
+        </Box>
+      </Box>
+    </ThemeProvider>
+  );
 }
