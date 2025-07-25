@@ -1,13 +1,14 @@
-import { ThemeProvider, createTheme } from "@mui/material/styles"
-import CssBaseline from "@mui/material/CssBaseline"
-import Dashboard from "./pages/Dashboard"
-import Register from './pages/Auth/Register/Register'
-import BorrowerRegister from './pages/Auth/Register/BorrowerRegister'
-import LenderRegister from './pages/Auth/Register/LenderRegister'
-import VerifierRegister from './pages/Auth/Register/VerifierRegister'
-import { Route, BrowserRouter, Routes } from "react-router-dom"
-import Login from "./pages/Auth/Login/Login"
-import OTPVerification from "./pages/Auth/OTPVerification"
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import BorrowerRoutes from "./pages/BorrowerPage/index";
+import Register from "./pages/Auth/Register/Register";
+import BorrowerRegister from "./pages/Auth/Register/BorrowerRegister";
+import LenderRegister from "./pages/Auth/Register/LenderRegister";
+import VerifierRegister from "./pages/Auth/Register/VerifierRegister";
+import { Route, BrowserRouter, Routes } from "react-router-dom";
+import Login from "./pages/Auth/Login/Login";
+import OTPVerification from "./pages/Auth/OTPVerification";
+import LenderRoutes from "./pages/LenderPage";
 
 const theme = createTheme({
   palette: {
@@ -24,7 +25,6 @@ const theme = createTheme({
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
   },
-
   components: {
     MuiCssBaseline: {
       styleOverrides: {
@@ -34,38 +34,40 @@ const theme = createTheme({
             height: '3px',
           },
           '*::-webkit-scrollbar-track': {
-            margin: '2px'
+            margin: '2px',
           },
           '*::-webkit-scrollbar-thumb': {
-            backgroundColor: '#a3a0a0'
+            backgroundColor: '#a3a0a0',
           },
           '*::-webkit-scrollbar-thumb:hover': {
-            backgroundColor: '#005bb5', // Darker blue on hover
+            backgroundColor: '#005bb5',
           },
         },
       },
     },
   },
-})
+});
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
-    <CssBaseline />
-    <BrowserRouter>
-      <Routes>
+      <CssBaseline />
+      <BrowserRouter>
+        <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/register/borrower" element={<BorrowerRegister />} />
-        <Route path="/register/lender" element={<LenderRegister />} />
-        <Route path="/register/verifier" element={<VerifierRegister />} />
-        <Route path="/verify-otp" element={<OTPVerification />} />
-      </Routes>
-    </BrowserRouter>
-  </ThemeProvider>
-  )
+          <Route path="/login" element={<Login />} />
+          <Route path="/borrower/*" element={<BorrowerRoutes />} />
+          {/* Add the lender route in the Routes section */}
+          <Route path="/lender/*" element={<LenderRoutes />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/register/borrower" element={<BorrowerRegister />} />
+          <Route path="/register/lender" element={<LenderRegister />} />
+          <Route path="/register/verifier" element={<VerifierRegister />} />
+          <Route path="/verify-otp" element={<OTPVerification />} />
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
+  );
 }
 
-export default App
+export default App;

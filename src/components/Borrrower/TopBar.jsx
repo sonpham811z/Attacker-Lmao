@@ -9,9 +9,9 @@ import {
   Brightness4 as DarkModeIcon,
   Language as LanguageIcon,
 } from "@mui/icons-material"
-import { useState } from "react"
-import { keyframes } from "@mui/system"
+import { useState, useRef } from "react"
 import { useLocation } from "react-router-dom"
+import { keyframes } from "@mui/system"
 
 const pulse = keyframes`
   0% {
@@ -46,22 +46,33 @@ const textGlow = keyframes`
   }
 `
 
-const PAGE_TITLES = {
-  "/": "Lender",
-  "/loan-requests": "Lender",
-  "/loans": "Loans",
-  "/submit": "Submit Another Deal",
-  "/credit-score": "Credit Score",
-  "/support": "Contact Support",
-  "/deals-room": "Deals Room",
-  "/monitor": "Lịch sử giao dịch On-chain",
-};
-
 const TopBar = () => {
   const [walletConnected, setWalletConnected] = useState(false)
   const [walletAddress, setWalletAddress] = useState("")
-  const location = useLocation();
-  const pageTitle = PAGE_TITLES[location.pathname] || "";
+  const { pathname } = useLocation()
+  const isInitialMount = useRef(true)
+
+  // Map routes to titles
+  const routeToTitle = {
+    "/borrower/dashboard": "Dashboard",
+    "/borrower/loans": "Loans",
+    "/borrower/submit-deal": "Submit Another Deal",
+    "/borrower/transaction-history": "Transaction History",
+    "/borrower/contact-support": "Contact Support",
+    "/borrower/deals-room": "Deals Room",
+    "/borrower/": "Dashboard", // Default route
+  }
+
+  const currentTitle = routeToTitle[pathname] || "Dashboard"
+
+  // Control textGlow animation
+  const getTextGlowAnimation = () => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false
+      return `${textGlow} 4s ease-in-out infinite`
+    }
+    return "none"
+  }
 
   const connectWallet = async () => {
     if (typeof window.ethereum !== "undefined") {
@@ -104,7 +115,7 @@ const TopBar = () => {
       }}
     >
       <Toolbar sx={{ justifyContent: "space-between", width: "100%", py: 1.5 }}>
-        {/* Left Section - Enhanced Title */}
+        {/* Left Section - Dynamic Title */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
           <Box sx={{ position: "relative" }}>
             <Typography
@@ -118,9 +129,9 @@ const TopBar = () => {
                 WebkitTextFillColor: "transparent",
                 position: "relative",
                 letterSpacing: "-0.5px",
-                animation: `${textGlow} 4s ease-in-out infinite`,
+                animation: getTextGlowAnimation(),
                 "&::before": {
-                  content: `"${pageTitle}"`,
+                  content: `"${currentTitle}"`,
                   position: "absolute",
                   top: 0,
                   left: 0,
@@ -144,7 +155,7 @@ const TopBar = () => {
                 },
               }}
             >
-              {pageTitle}
+              {currentTitle}
             </Typography>
           </Box>
         </Box>
@@ -303,10 +314,7 @@ const TopBar = () => {
               },
             }}
           >
-           
-          
-              <NotificationIcon sx={{ color: "#6c757d" }} />
-            
+            <NotificationIcon sx={{ color: "#6c757d" }} />
           </IconButton>
 
           <Divider orientation="vertical" flexItem sx={{ mx: 1, bgcolor: "#dee2e6" }} />

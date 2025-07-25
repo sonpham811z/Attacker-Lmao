@@ -1,4 +1,4 @@
-import { Box, Drawer, List, ListItem, ListItemIcon, ListItemText, Typography, Chip, Divider } from "@mui/material"
+import { Box, Drawer, List, ListItem, ListItemIcon, ListItemText, Typography, Chip, Divider } from "@mui/material";
 import {
   Dashboard as DashboardIcon,
   AccountBalance as LoansIcon,
@@ -9,9 +9,10 @@ import {
   TrendingUp as TrendingUpIcon,
   Notifications as NotificationsIcon,
   Settings as SettingsIcon,
-} from "@mui/icons-material"
-import { keyframes } from "@mui/system"
-import { Link, useLocation } from "react-router-dom";
+} from "@mui/icons-material";
+import { keyframes } from "@mui/system";
+import { useNavigate, useLocation } from "react-router-dom";
+import React, { memo, useRef } from "react";
 
 const slideIn = keyframes`
   0% {
@@ -22,7 +23,7 @@ const slideIn = keyframes`
     transform: translateX(0);
     opacity: 1;
   }
-`
+`;
 
 const pulse = keyframes`
   0% {
@@ -34,23 +35,33 @@ const pulse = keyframes`
   100% {
     transform: scale(1);
   }
-`
+`;
 
-const drawerWidth = 260 // Reduced from 280
+const drawerWidth = 240;
 
 const sidebarItems = [
-  { text: "Dashboard", icon: <DashboardIcon />, active: true, color: "#4285f4", link: "/" },
-  { text: "Loans", icon: <LoansIcon />, color: "#20bf6b", link: "/loans" },
-  { text: "Yêu cầu vay", icon: <SupportIcon />, color: "#1976d2", link: "/loan-requests" },
-  { text: "Submit Another Deal", icon: <AddIcon />, color: "#f39c12", link: "/submit" },
-  { text: "Credit Score", icon: <CreditScoreIcon />, color: "#9b59b6", link: "/credit-score" },
-  { text: "Contact Support", icon: <SupportIcon />, color: "#e74c3c", link: "/support" },
-  { text: "Deals Room", icon: <RoomIcon />, badge: "NEW", color: "#1abc9c", link: "/deals-room" },
-  { text: "Lịch sử giao dịch On-chain", icon: <TrendingUpIcon />, color: "#1976d2", link: "/monitor" },
-]
+  { text: "Dashboard", icon: <DashboardIcon />, path: "/borrower/dashboard", color: "#4285f4" },
+  { text: "Loans", icon: <LoansIcon />, path: "/borrower/loans", color: "#20bf6b" },
+  { text: "Submit Another Deal", icon: <AddIcon />, path: "/borrower/submit-deal", color: "#f39c12" },
+  { text: "Transaction History", icon: <CreditScoreIcon />, path: "/borrower/transaction-history", color: "#9b59b6" },
+  { text: "Contact Support", icon: <SupportIcon />, path: "/borrower/contact-support", color: "#e74c3c" },
+  { text: "Deals Room", icon: <RoomIcon />, badge: "NEW", path: "/borrower/deals-room", color: "#1abc9c" },
+];
 
 const Sidebar = () => {
-  const location = useLocation();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const isInitialMount = useRef(true);
+
+  // Prevent animation replay after initial mount
+  const getAnimation = (index) => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return `${slideIn} 0.6s ease-out ${index * 0.1}s both`;
+    }
+    return "none";
+  };
+
   return (
     <Drawer
       variant="permanent"
@@ -78,7 +89,6 @@ const Sidebar = () => {
           background: "linear-gradient(135deg, rgba(67, 133, 244, 0.05) 0%, rgba(25, 118, 210, 0.05) 100%)",
         }}
       >
-        {/* Placeholder for logo image */}
         <Box
           sx={{
             display: "inline-flex",
@@ -133,91 +143,87 @@ const Sidebar = () => {
 
       {/* Navigation Menu */}
       <List sx={{ px: 1.5, py: 2, flex: 1 }}>
-        {sidebarItems.map((item, index) => {
-          const isActive = location.pathname === item.link;
-          return (
-            <Box
-              key={item.text}
+        {sidebarItems.map((item, index) => (
+          <Box
+            key={item.text}
+            sx={{
+              animation: getAnimation(index),
+            }}
+          >
+            <ListItem
+              onClick={() => navigate(item.path)}
               sx={{
-                animation: `${slideIn} 0.6s ease-out ${index * 0.1}s both`,
+                mb: 1,
+                borderRadius: 2.5,
+                position: "relative",
+                overflow: "hidden",
+                bgcolor: pathname === item.path ? "rgba(67, 133, 244, 0.1)" : "transparent",
+                border: pathname === item.path ? "1px solid rgba(67, 133, 244, 0.2)" : "1px solid transparent",
+                transition: "all 0.3s ease",
+                cursor: "pointer",
+                "&:hover": {
+                  bgcolor: pathname === item.path ? "rgba(67, 133, 244, 0.15)" : "rgba(0, 0, 0, 0.04)",
+                  transform: "translateX(6px)",
+                  border: `1px solid ${item.color}30`,
+                  boxShadow: `0 2px 8px ${item.color}20`,
+                },
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: pathname === item.path ? "3px" : "0px",
+                  bgcolor: item.color,
+                  transition: "width 0.3s ease",
+                },
+                "&:hover::before": {
+                  width: "3px",
+                },
               }}
             >
-              <ListItem
-                component={Link}
-                to={item.link}
+              <ListItemIcon
                 sx={{
-                  mb: 1,
-                  borderRadius: 2.5,
-                  position: "relative",
-                  overflow: "hidden",
-                  bgcolor: isActive ? "rgba(67, 133, 244, 0.1)" : "transparent",
-                  border: isActive ? `1px solid ${item.color}` : "1px solid transparent",
+                  color: pathname === item.path ? item.color : "#6c757d",
+                  minWidth: 40,
                   transition: "all 0.3s ease",
-                  cursor: "pointer",
-                  "&:hover": {
-                    bgcolor: isActive ? "rgba(67, 133, 244, 0.15)" : "rgba(0, 0, 0, 0.04)",
-                    transform: "translateX(6px)",
-                    border: `1px solid ${item.color}30`,
-                    boxShadow: `0 2px 8px ${item.color}20`,
-                  },
-                  "&::before": {
-                    content: '""',
-                    position: "absolute",
-                    left: 0,
-                    top: 0,
-                    bottom: 0,
-                    width: isActive ? "3px" : "0px",
-                    bgcolor: item.color,
-                    transition: "width 0.3s ease",
-                  },
-                  "&:hover::before": {
-                    width: "3px",
+                  "& svg": {
+                    fontSize: "1.2rem",
+                    filter: pathname === item.path ? `drop-shadow(0 0 6px ${item.color}40)` : "none",
                   },
                 }}
               >
-                <ListItemIcon
-                  sx={{
-                    color: isActive ? item.color : "#6c757d",
-                    minWidth: 40,
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText
+                primary={item.text}
+                sx={{
+                  "& .MuiTypography-root": {
+                    fontSize: "0.9rem",
+                    fontWeight: pathname === item.path ? 600 : 500,
+                    color: pathname === item.path ? "#2c3e50" : "#495057",
                     transition: "all 0.3s ease",
-                    "& svg": {
-                      fontSize: "1.2rem",
-                      filter: isActive ? `drop-shadow(0 0 6px ${item.color}40)` : "none",
-                    },
-                  }}
-                >
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText
-                  primary={item.text}
+                  },
+                }}
+              />
+              {item.badge && (
+                <Chip
+                  label={item.badge}
+                  size="small"
                   sx={{
-                    "& .MuiTypography-root": {
-                      fontSize: "0.9rem",
-                      fontWeight: isActive ? 600 : 500,
-                      color: isActive ? item.color : "#495057",
-                      transition: "all 0.3s ease",
-                    },
+                    bgcolor: "#e74c3c",
+                    color: "white",
+                    fontSize: "0.65rem",
+                    height: 20,
+                    fontWeight: 600,
+                    animation: `${pulse} 2s infinite`,
+                    boxShadow: "0 2px 6px rgba(231, 76, 60, 0.3)",
                   }}
                 />
-                {item.badge && (
-                  <Chip
-                    label={item.badge}
-                    size="small"
-                    sx={{
-                      bgcolor: "#e74c3c",
-                      color: "white",
-                      fontSize: "0.65rem",
-                      height: 20,
-                      fontWeight: 600,
-                      animation: `${pulse} 2s infinite`,
-                      boxShadow: "0 2px 6px rgba(231, 76, 60, 0.3)",
-                    }}
-                  />
-                )}
-              </ListItem>
-            </Box>
-          );
-        })}
+              )}
+            </ListItem>
+          </Box>
+        ))}
       </List>
 
       <Divider sx={{ bgcolor: "rgba(0,0,0,0.08)" }} />
@@ -256,7 +262,6 @@ const Sidebar = () => {
           </Typography>
         </Box>
 
-        {/* Quick Actions */}
         <Box sx={{ display: "flex", gap: 1, mt: 1.5 }}>
           <Box
             sx={{
@@ -301,6 +306,7 @@ const Sidebar = () => {
         </Box>
       </Box>
     </Drawer>
-  )
-}
-export default Sidebar
+  );
+};
+
+export default memo(Sidebar);

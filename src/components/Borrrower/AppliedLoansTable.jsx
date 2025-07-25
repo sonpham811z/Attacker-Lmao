@@ -120,18 +120,6 @@ const getStatusColor = (status) => {
   }
 }
 
-const getPriorityColor = (priority) => {
-  switch (priority) {
-    case "high":
-      return "#e74c3c"
-    case "medium":
-      return "#f39c12"
-    case "low":
-      return "#20bf6b"
-    default:
-      return "#6c757d"
-  }
-}
 
 const AppliedLoansTable = () => {
   return (
