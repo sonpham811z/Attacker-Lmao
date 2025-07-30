@@ -40,7 +40,7 @@ const LenderRoutes = () => {
 
   return (
     <>
-      <LenderSidebar />
+      
       <Routes>
         <Route path="dashboard" element={<LenderDashboard />} />
         <Route path="requests" element={<LoanRequests />} />

@@ -2,6 +2,8 @@ import { Card, CardContent, Box, Typography } from "@mui/material"
 import { TrendingUp, CheckCircle, ShowChart as ShowChartIcon } from "@mui/icons-material"
 import { AreaChart, Area, XAxis, ResponsiveContainer } from "recharts"
 import { keyframes } from "@mui/system"
+import { useSelector } from "react-redux"
+import { selectCurrentBorrower } from "../../redux/borrowerSlice"
 
 const gradientShift = keyframes`
   0% {
@@ -52,6 +54,8 @@ const chartData = [
 ]
 
 const CommunicationCard = () => {
+  const borrower = useSelector(selectCurrentBorrower)
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3, height: "100%" }}>
       {/* Top Section - Performance Chart */}
@@ -260,7 +264,7 @@ const CommunicationCard = () => {
                 animation: `${float} 4s ease-in-out infinite`,
               }}
             >
-              742
+              {borrower.creditScore}
             </Typography>
 
             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 1 }}>

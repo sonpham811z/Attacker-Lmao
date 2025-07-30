@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { useNavigate, useLocation } from "react-router-dom"
+import { useState, useRef } from "react"
+import { useNavigate, useSearchParams, useLocation} from "react-router-dom"
 import {
   Box,
   Card,
@@ -22,29 +22,26 @@ import {
   Refresh as RefreshIcon,
   CheckCircle as CheckIcon,
 } from "@mui/icons-material"
+import { verifyAccountAPI, verifyAccountLendersAPI } from "../../apis"
 
 const OTPVerification = () => {
   const navigate = useNavigate()
   const location = useLocation()
+  const role = location.pathname.split('/')[1]
   const [otp, setOtp] = useState(["", "", "", "", "", ""])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
+  let[searchParams] = useSearchParams()
+  const registerdEmail = searchParams.get('Registeremail')
 
 
   // Refs for OTP inputs
   const inputRefs = useRef([])
 
   // Get email from navigation state or use default
-  const userEmail = location.state?.email || "user@example.com"
+  const userEmail = registerdEmail
 
-
-  // Format time display
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, "0")}`
-  }
 
   // Handle OTP input change
   const handleOtpChange = (index, value) => {
@@ -101,20 +98,21 @@ const OTPVerification = () => {
     setError("")
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      // For demo purposes, accept "123456" as valid OTP
-      if (otpString === "123456") {
+      if (role === 'borrower') {
+        await verifyAccountAPI({ otpCode: otpString, email: registerdEmail })
         setSuccess(true)
-        setTimeout(() => {
-          navigate("/dashboard") // or wherever you want to redirect after successful verification
-        }, 1500)
+        setTimeout(() => navigate('/login/borrower'), 2000)
+      } else if (role === 'lender') {
+        await verifyAccountLendersAPI({ otpCode: otpString, email: registerdEmail })
+        setSuccess(true)
+        setTimeout(() => navigate('/login/lender'), 2000)
       } else {
-        setError("Invalid OTP. Please try again.")
+        throw new Error('Unsupported role')
       }
+
     } catch (err) {
       setError("Verification failed. Please try again.")
+      console.log(err)
     } finally {
       setLoading(false)
     }

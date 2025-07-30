@@ -1,9 +1,9 @@
 
 import axios from 'axios'
 import { toast } from 'react-toastify'
-import { logOutAPI } from '~/redux/user/userSlice'
-import { interceptorLoadingElements } from '~/utils/formatter'
-import { refreshTokenAPI } from '~/apis'
+import { logOutAPI } from '../redux/borrowerSlice'
+import { interceptorLoadingElements } from '../utils/formatter'
+import { refreshTokenAPI } from '../apis/index'
 
 
 const authorizedAxios = axios.create({})
