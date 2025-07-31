@@ -1,8 +1,14 @@
-import { Navigate, Outlet } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom';
 
 const PublicRoute = ({ user, redirectPath = '/' }) => {
-  if (user) return <Navigate to={redirectPath} replace />
-  return <Outlet />
-}
+  // Nếu đã đăng nhập thì chuyển hướng
+  if (user) {
+    return <Navigate to={redirectPath} replace />;
+  }
 
-export default PublicRoute
+  // Nếu chưa login, cho vào route con (Outlet)
+  return <Outlet />;
+};
+
+export default PublicRoute;
+

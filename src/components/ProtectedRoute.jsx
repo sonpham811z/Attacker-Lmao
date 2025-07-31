@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom'
 
 const ProtectedRoute = ({ user, allowedRoles }) => {
-  if (!user) return <Navigate to="/login/borrower" replace />
+  if (!user) return <Navigate to="/login/lender" replace />
 
   if (!allowedRoles) return <Outlet />
 

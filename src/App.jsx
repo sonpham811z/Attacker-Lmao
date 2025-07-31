@@ -64,42 +64,41 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <BrowserRouter>
+    <CssBaseline />
+    <BrowserRouter>
       <Routes>
-  <Route path="/" element={<Navigate to="/login/borrower" replace />} />
-
-      {/* 🔐 Các route công khai mà chỉ nên thấy khi chưa login */}
-      <Route element={<PublicRoute user={currentBorrower} redirectPath="/borrower/dashboard" />}>
-        <Route path="/login/borrower" element={<Login />} />
-        <Route path="/login/lender" element={<LoginLender />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/register/borrower" element={<BorrowerRegister />} />
-        <Route path="/borrower/verify-otp" element={<OTPVerification />} />
-        <Route path="/unauthorized" element={<Unauthorized />} />
-
-      </Route>
-
-      <Route element={<PublicRoute user={currentLender} redirectPath="/lender/dashboard" />}>
-        <Route path="/register/lender" element={<LenderRegister />} />
-        <Route path="/lender/verify-otp" element={<OTPVerification />} />
-      </Route>
-
-
-  {/* Protected route */}
-      <Route element={<ProtectedRoute user={currentBorrower} />}>
-        <Route path="/borrower/*" element={<BorrowerRoutes />} />
-      </Route>
-
-      <Route element={<ProtectedRoute user={currentLender} />}>
-        <Route path="/lender/*" element={<LenderRoutes />} />
-      </Route>
-
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
-      </BrowserRouter>
-    </ThemeProvider>
-  );
+        {/* ⛔ Redirect root */}
+        <Route path="/" element={<Navigate to="/login/borrower" replace />} />
+  
+        {/* 👥 PUBLIC ROUTES - Borrower */}
+        <Route element={<PublicRoute user={currentBorrower} redirectPath="/borrower/dashboard" />}>
+          <Route path="/login/borrower" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/register/borrower" element={<BorrowerRegister />} />
+          <Route path="/borrower/verify-otp" element={<OTPVerification />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
+        </Route>
+  
+        {/* 👥 PUBLIC ROUTES - Lender */}
+        <Route element={<PublicRoute user={currentLender} redirectPath="/lender/dashboard" />}>
+          <Route path="/login/lender" element={<LoginLender />} />
+          <Route path="/register/lender" element={<LenderRegister />} />
+          <Route path="/lender/verify-otp" element={<OTPVerification />} />
+        </Route>
+  
+        {/* 🔐 PROTECTED ROUTES */}
+        <Route element={<ProtectedRoute user={currentBorrower} />}>
+          <Route path="/borrower/*" element={<BorrowerRoutes />} />
+        </Route>
+        <Route element={<ProtectedRoute user={currentLender} />}>
+          <Route path="/lender/*" element={<LenderRoutes />} />
+        </Route>
+  
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </BrowserRouter>
+  </ThemeProvider>
+  )  
 }
 
 export default App;
