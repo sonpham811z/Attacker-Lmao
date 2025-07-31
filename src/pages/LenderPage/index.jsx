@@ -10,6 +10,8 @@ import Analytics from "./Analytics"
 import CompanyProfile from "./CompanyProfile"
 import ContactSupport from "./ContactSupport"
 
+import { InvestmentProvider } from "../../context/InvestmentContext"
+
 const LenderRoutes = () => {
   const navigate = useNavigate()
 
@@ -45,7 +47,13 @@ const LenderRoutes = () => {
         <Route path="dashboard" element={<LenderDashboard />} />
         <Route path="requests" element={<LoanRequests />} />
         <Route path="search" element={<FindOpportunities />} />
-        <Route path="portfolio" element={<Portfolio />} />
+
+        <Route path="portfolio" element={
+          <InvestmentProvider>
+            <Portfolio />
+          </InvestmentProvider>
+        } />
+
         <Route path="analytics" element={<Analytics />} />
         <Route path="company" element={<CompanyProfile />} />
         <Route path="support" element={<ContactSupport />} />

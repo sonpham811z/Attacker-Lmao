@@ -9,6 +9,8 @@ import { Route, BrowserRouter, Routes } from "react-router-dom";
 import Login from "./pages/Auth/Login/Login";
 import OTPVerification from "./pages/Auth/OTPVerification";
 import LenderRoutes from "./pages/LenderPage";
+import ValidatorRoutes from "./pages/ValidatorPage/index.jsx";
+
 
 const theme = createTheme({
   palette: {
@@ -57,6 +59,8 @@ function App() {
         <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/borrower/*" element={<BorrowerRoutes />} />
+          <Route path="/lender/*" element={<LenderRoutes />} />
+          <Route path="/validator/*" element={<ValidatorRoutes />} />
           {/* Add the lender route in the Routes section */}
           <Route path="/lender/*" element={<LenderRoutes />} />
           <Route path="/register" element={<Register />} />

@@ -102,17 +102,17 @@ const TopBar = () => {
   }
 
   return (
-    <AppBar
-      position="static"
-      elevation={0}
-      sx={{
-        background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
-        color: "#2c3e50",
-        borderBottom: "1px solid #e9ecef",
-        width: "100%",
-        ml: 0,
-        boxShadow: "0 2px 20px rgba(0,0,0,0.08)",
-      }}
+        <AppBar
+            elevation={0}
+            position="static"
+            color="inherit"
+            sx={{
+                background: "#fff",
+                borderBottom: "1px solid #e0e0e0",
+                zIndex: 1201,
+                width: '100%',
+                maxWidth: '100vw',
+            }}
     >
       <Toolbar sx={{ justifyContent: "space-between", width: "100%", py: 1.5 }}>
         {/* Left Section - Dynamic Title */}
