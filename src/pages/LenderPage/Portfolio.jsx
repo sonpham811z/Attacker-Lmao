@@ -1,11 +1,14 @@
 "use client"
 
+
 import { Box, Typography, Card, CardContent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, Avatar } from "@mui/material"
 import { CheckCircle, HourglassTop, TrendingUp } from "@mui/icons-material"
+
 import LenderTopBar from "../../components/Lender/LenderTopBar"
 import InvestmentStatsCard from "../../components/Lender/InvestmentStatsCard"
 import { TrendingUp as PortfolioIcon } from "@mui/icons-material"
 import LenderSidebar from "../../components/Lender/LenderSidebar"
+
 
 import { useState } from "react"
 
@@ -59,6 +62,7 @@ const Portfolio = () => {
       <Box component="main" sx={{ flexGrow: 1, width: "100%", minWidth: 0 }}>
         <LenderTopBar />
         <Box sx={{ p: 3, width: "100%" }}>
+
         {/* Header */}
         <Card
           sx={{
@@ -86,6 +90,7 @@ const Portfolio = () => {
 
         {/* Portfolio Stats */}
         <InvestmentStatsCard />
+
 
         {/* Investment Details Table - Beautiful MUI Table */}
         <Card sx={{ mt: 4, borderRadius: 3, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
@@ -177,6 +182,7 @@ const Portfolio = () => {
             </CardContent>
           </Card>
         )}
+
       </Box>
       </Box>
     </Box>

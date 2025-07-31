@@ -392,3 +392,4 @@ const InvestmentStatsCard = () => {
 }
 
 export default InvestmentStatsCard;
+

@@ -176,6 +176,7 @@ const FindOpportunitiesContent = () => {
             </Grid>
           </Grid>
         </Box>
+
       </Box>
     </Box>
   )
@@ -188,5 +189,6 @@ const FindOpportunities = () => {
     </InvestmentProvider>
   )
 }
+
 
 export default FindOpportunities

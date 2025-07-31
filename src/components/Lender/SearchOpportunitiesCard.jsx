@@ -33,6 +33,8 @@ const pulse = keyframes`
 `
 
 const SearchOpportunitiesCard = ({ onSearch, onClear }) => {
+
+
   const [filters, setFilters] = useState({
     amountRange: [10000, 100000],
     interestRange: [5, 15],
@@ -69,6 +71,7 @@ const SearchOpportunitiesCard = ({ onSearch, onClear }) => {
     if (onSearch) {
       onSearch({ ...filters, searchTerm })
     }
+
   }
 
   return (
@@ -351,6 +354,7 @@ const SearchOpportunitiesCard = ({ onSearch, onClear }) => {
             size="large"
             startIcon={<SearchIcon />}
             onClick={handleSearch}
+
             sx={{
               background: "linear-gradient(135deg, #f39c12 0%, #e67e22 100%)",
               color: "white",

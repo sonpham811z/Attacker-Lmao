@@ -11,6 +11,7 @@ import OTPVerification from "./pages/Auth/OTPVerification";
 import LenderRoutes from "./pages/LenderPage";
 import ValidatorRoutes from "./pages/ValidatorPage/index.jsx";
 
+
 const theme = createTheme({
   palette: {
     primary: {
@@ -60,6 +61,8 @@ function App() {
           <Route path="/borrower/*" element={<BorrowerRoutes />} />
           <Route path="/lender/*" element={<LenderRoutes />} />
           <Route path="/validator/*" element={<ValidatorRoutes />} />
+          {/* Add the lender route in the Routes section */}
+          <Route path="/lender/*" element={<LenderRoutes />} />
           <Route path="/register" element={<Register />} />
           <Route path="/register/borrower" element={<BorrowerRegister />} />
           <Route path="/register/lender" element={<LenderRegister />} />

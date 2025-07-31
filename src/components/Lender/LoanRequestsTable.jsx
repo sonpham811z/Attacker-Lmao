@@ -21,6 +21,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+
 } from "@mui/material"
 import {
   Visibility as VisibilityIcon,
@@ -110,7 +111,7 @@ const loanRequests = [
     avatar: "/placeholder.svg?height=40&width=40&text=D",
   },
 ]
-// ...existing code...
+
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -495,6 +496,7 @@ const LoanRequestsTable = ({ requests = [], onInvest }) => {
         </DialogActions>
       </Dialog>
     </>
+
   )
 }
 
