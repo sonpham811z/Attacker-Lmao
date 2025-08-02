@@ -17,6 +17,8 @@ import Unauthorized from "./pages/UnauthorizedPage/unauthorize";
 // Route Layouts
 import BorrowerRoutes from "./pages/BorrowerPage"; // index.jsx
 import LenderRoutes from "./pages/LenderPage";
+import ValidatorRoutes from "./pages/ValidatorPage/index.jsx";
+
 
 // Redux selector
 import { selectCurrentBorrower } from "./redux/borrowerSlice";
@@ -64,15 +66,16 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-    <CssBaseline />
-    <BrowserRouter>
-      <Routes>
-        {/* ⛔ Redirect root */}
-        <Route path="/" element={<Navigate to="/login/borrower" replace />} />
-  
-        {/* 👥 PUBLIC ROUTES - Borrower */}
-        <Route element={<PublicRoute user={currentBorrower} redirectPath="/borrower/dashboard" />}>
-          <Route path="/login/borrower" element={<Login />} />
+      <CssBaseline />
+      <BrowserRouter>
+        <Routes>
+        <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/borrower/*" element={<BorrowerRoutes />} />
+          <Route path="/lender/*" element={<LenderRoutes />} />
+          <Route path="/validator/*" element={<ValidatorRoutes />} />
+          {/* Add the lender route in the Routes section */}
+          <Route path="/lender/*" element={<LenderRoutes />} />
           <Route path="/register" element={<Register />} />
           <Route path="/register/borrower" element={<BorrowerRegister />} />
           <Route path="/borrower/verify-otp" element={<OTPVerification />} />

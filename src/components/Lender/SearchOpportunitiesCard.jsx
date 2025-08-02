@@ -32,7 +32,9 @@ const pulse = keyframes`
   }
 `
 
-const SearchOpportunitiesCard = () => {
+const SearchOpportunitiesCard = ({ onSearch, onClear }) => {
+
+
   const [filters, setFilters] = useState({
     amountRange: [10000, 100000],
     interestRange: [5, 15],
@@ -61,6 +63,15 @@ const SearchOpportunitiesCard = () => {
       creditScore: [600, 850],
     })
     setSearchTerm("")
+    if (onClear) onClear()
+  }
+
+  // Hàm xử lý khi nhấn nút tìm kiếm
+  const handleSearch = () => {
+    if (onSearch) {
+      onSearch({ ...filters, searchTerm })
+    }
+
   }
 
   return (
@@ -342,6 +353,8 @@ const SearchOpportunitiesCard = () => {
             variant="contained"
             size="large"
             startIcon={<SearchIcon />}
+            onClick={handleSearch}
+
             sx={{
               background: "linear-gradient(135deg, #f39c12 0%, #e67e22 100%)",
               color: "white",
