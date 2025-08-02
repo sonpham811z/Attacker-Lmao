@@ -26,6 +26,8 @@ import {
   Delete as DeleteIcon,
   AppRegistration as RegisterIcon,
 } from "@mui/icons-material"
+import { registerAccountAPI } from "../../../apis"
+import { toast } from "react-toastify"
 
 const BorrowerRegister = () => {
   const navigate = useNavigate()
@@ -108,8 +110,8 @@ const BorrowerRegister = () => {
 
     if (!formData.idNumber.trim()) {
       newErrors.idNumber = "Please enter your ID number"
-    } else if (!/^[0-9]{10}$/.test(formData.idNumber)) {
-      newErrors.idNumber = "ID number must be 10 digits"
+    } else if (!/^[0-9]{12}$/.test(formData.idNumber)) {
+      newErrors.idNumber = "ID number must be 12 digits"
     }
 
     if (!formData.password.trim()) {
@@ -144,11 +146,28 @@ const BorrowerRegister = () => {
 
     setLoading(true)
 
-    setTimeout(() => {
-      setLoading(false)
-      console.log(formData)
+    try {
+      const formDataToSend = new FormData()
 
-    }, 2000)
+      for(const key in formData) {
+        formDataToSend.append(key, formData[key])
+      }
+
+      if(uploadedImage) {
+        formDataToSend.append('avatar', uploadedImage)
+      }
+
+      await registerAccountAPI(formDataToSend)
+      navigate(`/borrower/verify-otp?Registeremail=${formData.email}`)
+      
+    } catch (error) {
+      toast.error("Register error")
+      console.log(error)
+    } finally {
+      setLoading(false)
+    }
+
+   
   }
 
   const isFormValid = () => {

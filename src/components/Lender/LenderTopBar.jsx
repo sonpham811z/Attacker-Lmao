@@ -1,6 +1,7 @@
 "use client"
 
-import { AppBar, Toolbar, Typography, Box, IconButton, Badge, Avatar, Button, Divider } from "@mui/material"
+import { AppBar, Toolbar, Typography, Box, IconButton, Badge, Avatar, Button, Divider, Menu, MenuItem,  ListItemIcon,
+  ListItemText, } from "@mui/material"
 import {
   NotificationsActive as NotificationIcon,
   AccountBalanceWallet as WalletIcon,
@@ -8,10 +9,14 @@ import {
   ExpandMore as ExpandMoreIcon,
   Language as LanguageIcon,
   TrendingUp as TrendingUpIcon,
+  Logout as LogoutIcon,
 } from "@mui/icons-material"
 import { useState, useRef } from "react"
 import { useLocation } from "react-router-dom"
 import { keyframes } from "@mui/system"
+import { logOutAPI } from "../../redux/lenderSlice"
+import { toast } from "react-toastify"
+import { useDispatch } from "react-redux"
 
 const pulse = keyframes`
   0% {
@@ -38,10 +43,13 @@ const textGlow = keyframes`
 `
 
 const LenderTopBar = () => {
-  const [walletConnected, setWalletConnected] = useState(true)
+  const [walletConnected, setWalletConnected] = useState(false)
   const [walletAddress, setWalletAddress] = useState("0x742d35Cc6634C0532925a3b8D3Cb2")
   const { pathname } = useLocation()
   const isInitialMount = useRef(true)
+  const [anchorEl, setAnchorEl] = useState(null)
+  const dispatch = useDispatch()
+  
 
   // Map routes to titles for lender
   const routeToTitle = {
@@ -90,6 +98,21 @@ const LenderTopBar = () => {
 
   const formatAddress = (address) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`
+  }
+
+
+  const handleUserMenuClose = () => {
+    setAnchorEl(null)
+  }
+
+  const handleLogout = async() => {
+    try {
+      await dispatch(logOutAPI()).unwrap()
+      handleUserMenuClose()
+    } catch (error) {
+      console.log(error)
+      toast.error("Logout error")
+    }
   }
 
   return (
@@ -272,6 +295,7 @@ const LenderTopBar = () => {
 
           {/* User Profile */}
           <Box
+          onClick={(e) => setAnchorEl(e.currentTarget)}
             sx={{
               display: "flex",
               alignItems: "center",
@@ -329,10 +353,66 @@ const LenderTopBar = () => {
               }}
             />
           </Box>
+
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleUserMenuClose}
+            PaperProps={{
+              sx: {
+                mt: 1,
+                minWidth: 200,
+                borderRadius: 2,
+                boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+                border: "1px solid #e9ecef",
+                "& .MuiMenuItem-root": {
+                  px: 2,
+                  py: 1.5,
+                  borderRadius: 1,
+                  mx: 1,
+                  my: 0.5,
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    bgcolor: "#f8f9fa",
+                    transform: "translateX(4px)",
+                  },
+                },
+              },
+            }}
+            transformOrigin={{ horizontal: "right", vertical: "top" }}
+            anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+          >
+
+            <Divider sx={{ my: 1 }} />
+
+            <MenuItem
+              onClick={handleLogout}
+              sx={{
+                "&:hover": {
+                  bgcolor: "rgba(244, 67, 54, 0.08) !important",
+                  "& .MuiListItemIcon-root, & .MuiListItemText-primary": {
+                    color: "#f44336 !important",
+                  },
+                },
+              }}
+            >
+              <ListItemIcon>
+                <LogoutIcon sx={{ fontSize: 20, color: "#6c757d" }} />
+              </ListItemIcon>
+              <ListItemText
+                primary="Logout"
+                primaryTypographyProps={{
+                  fontSize: "0.9rem",
+                  fontWeight: 500,
+                }}
+              />
+            </MenuItem>
+          </Menu>
         </Box>
       </Toolbar>
     </AppBar>
   )
 }
+
 
 export default LenderTopBar
