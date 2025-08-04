@@ -393,7 +393,7 @@ const Login = () => {
                 fontSize: "0.9rem",
               }}
             >
-              © 2024 NLC Platform. All rights reserved.
+              © 2025 NLC Platform. All rights reserved.
             </Typography>
           </Box>
         </Fade>

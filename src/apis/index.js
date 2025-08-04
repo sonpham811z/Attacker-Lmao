@@ -51,3 +51,28 @@ export const verifyAccountLendersAPI = async(data) => {
   return response.data
 
 }
+
+export const registerValidatorAccountAPI = async (formData) => {
+  const response = await authorizedAxios.post(
+    `${API_ROOT}/server/validators/register`,
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    }
+  )
+  toast.success('Account created successfully, please check your email to verify your account')
+  return response.data
+}
+
+export const refreshTokenValidatorAPI = async() => {
+  return await authorizedAxios.put(`${API_ROOT}/server/validators/refreshToken`)
+}
+
+export const verifyAccountValidatorsAPI = async(data) => {
+  const response = await authorizedAxios.put(`${API_ROOT}/server/validators/verifyAccount`, data)
+  toast.success('Account verify successfully, Login to use our services')
+  return response.data
+
+}

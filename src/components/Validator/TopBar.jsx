@@ -19,6 +19,9 @@ import {
   Stack,
   Divider,
   Tooltip,
+  Menu,
+  MenuItem,
+  ListItemIcon,
 } from "@mui/material"
 import {
   NotificationsActive as NotificationIcon,
@@ -31,9 +34,15 @@ import {
   Brightness4 as DarkModeIcon,
   Language as LanguageIcon,
   Search as SearchIcon,
+  Person as PersonIcon,
+  Settings as SettingsIcon,
+  Logout as LogoutIcon,
 } from "@mui/icons-material"
 import { NotificationContext } from "../../pages/ValidatorPage/NotificationPage"
 import { keyframes } from "@mui/system"
+import { useDispatch } from "react-redux"
+import { logOutAPI } from "../../redux/validatorSlice"
+import { toast } from "react-toastify"
 
 const pulse = keyframes`
   0% {
@@ -108,19 +117,54 @@ const typeMap = {
   info: { icon: <InfoIcon color="primary" />, color: "primary" },
 }
 
-const ValidatorTopBar = ({ unread = 0 }) => {
+const ValidatorTopBar = () => {
+  const dispatch = useDispatch()
   const { pathname } = useLocation()
+
+  // Tách riêng state cho notification và user menu
+  const [notificationAnchorEl, setNotificationAnchorEl] = useState(null)
+  const [userMenuAnchorEl, setUserMenuAnchorEl] = useState(null)
+
   const title = routeTitles[pathname] || "Validator Portal"
   const { setUnread } = useContext(NotificationContext)
-  const [anchorEl, setAnchorEl] = useState(null)
   const [notiList, setNotiList] = useState(notifications)
 
-  const handleBellClick = (event) => {
-    setAnchorEl(event.currentTarget)
+  // Handlers cho user menu
+  const handleUserMenuClick = (event) => {
+    setUserMenuAnchorEl(event.currentTarget)
   }
 
-  const handleClose = () => {
-    setAnchorEl(null)
+  const handleUserMenuClose = () => {
+    setUserMenuAnchorEl(null)
+  }
+
+  const handleLogout = async () => {
+    try {
+      dispatch(logOutAPI())
+      handleUserMenuClose()
+    } catch (error) {
+      console.log(error)
+      toast.error("Logout error")
+    }
+  }
+
+  const handleProfile = () => {
+    console.log("Navigate to profile...")
+    handleUserMenuClose()
+  }
+
+  const handleSettings = () => {
+    console.log("Navigate to settings...")
+    handleUserMenuClose()
+  }
+
+  // Handlers cho notification
+  const handleBellClick = (event) => {
+    setNotificationAnchorEl(event.currentTarget)
+  }
+
+  const handleNotificationClose = () => {
+    setNotificationAnchorEl(null)
   }
 
   const handleMarkRead = (id) => {
@@ -131,8 +175,9 @@ const ValidatorTopBar = ({ unread = 0 }) => {
     setNotiList(notiList.filter((n) => n.id !== id))
   }
 
-  const open = Boolean(anchorEl)
-  const id = open ? "notification-popover" : undefined
+  // States cho notification popover
+  const notificationOpen = Boolean(notificationAnchorEl)
+  const notificationId = notificationOpen ? "notification-popover" : undefined
 
   return (
     <AppBar
@@ -142,8 +187,7 @@ const ValidatorTopBar = ({ unread = 0 }) => {
         background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
         color: "#2c3e50",
         borderBottom: "1px solid #e9ecef",
-        
-        width: "82vw",
+        width: "83vw",
         boxShadow: "0 2px 20px rgba(0,0,0,0.08)",
       }}
     >
@@ -190,7 +234,6 @@ const ValidatorTopBar = ({ unread = 0 }) => {
             >
               {title}
             </Typography>
-         
           </Box>
         </Box>
 
@@ -275,10 +318,10 @@ const ValidatorTopBar = ({ unread = 0 }) => {
           </Tooltip>
 
           <Popover
-            id={id}
-            open={open}
-            anchorEl={anchorEl}
-            onClose={handleClose}
+            id={notificationId}
+            open={notificationOpen}
+            anchorEl={notificationAnchorEl}
+            onClose={handleNotificationClose}
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "right" }}
             PaperProps={{
@@ -438,6 +481,7 @@ const ValidatorTopBar = ({ unread = 0 }) => {
 
           {/* User Profile */}
           <Box
+            onClick={handleUserMenuClick}
             sx={{
               display: "flex",
               alignItems: "center",
@@ -499,6 +543,86 @@ const ValidatorTopBar = ({ unread = 0 }) => {
               }}
             />
           </Box>
+
+          <Menu
+            anchorEl={userMenuAnchorEl}
+            open={Boolean(userMenuAnchorEl)}
+            onClose={handleUserMenuClose}
+            PaperProps={{
+              sx: {
+                mt: 1,
+                minWidth: 200,
+                borderRadius: 2,
+                boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+                border: "1px solid #e9ecef",
+                "& .MuiMenuItem-root": {
+                  px: 2,
+                  py: 1.5,
+                  borderRadius: 1,
+                  mx: 1,
+                  my: 0.5,
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    bgcolor: "#f8f9fa",
+                    transform: "translateX(4px)",
+                  },
+                },
+              },
+            }}
+            transformOrigin={{ horizontal: "right", vertical: "top" }}
+            anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+          >
+            <MenuItem onClick={handleProfile}>
+              <ListItemIcon>
+                <PersonIcon sx={{ fontSize: 20, color: "#6c757d" }} />
+              </ListItemIcon>
+              <ListItemText
+                primary="Profile"
+                primaryTypographyProps={{
+                  fontSize: "0.9rem",
+                  fontWeight: 500,
+                }}
+              />
+            </MenuItem>
+
+            <MenuItem onClick={handleSettings}>
+              <ListItemIcon>
+                <SettingsIcon sx={{ fontSize: 20, color: "#6c757d" }} />
+              </ListItemIcon>
+              <ListItemText
+                primary="Settings"
+                primaryTypographyProps={{
+                  fontSize: "0.9rem",
+                  fontWeight: 500,
+                }}
+              />
+            </MenuItem>
+
+            <Divider sx={{ my: 1 }} />
+
+            <MenuItem
+              onClick={handleLogout}
+              sx={{
+                "&:hover": {
+                  bgcolor: "rgba(244, 67, 54, 0.08) !important",
+                  "& .MuiListItemIcon-root, & .MuiListItemText-primary": {
+                    color: "#f44336 !important",
+                  },
+                },
+              }}
+            >
+              <ListItemIcon>
+                <LogoutIcon sx={{ fontSize: 20, color: "#6c757d" }} />
+              </ListItemIcon>
+              <ListItemText
+                primary="Logout"
+                primaryTypographyProps={{
+                  fontSize: "0.9rem",
+                  fontWeight: 500,
+                }}
+              />
+            </MenuItem>
+          </Menu>
         </Box>
       </Toolbar>
     </AppBar>

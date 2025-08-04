@@ -16,6 +16,7 @@ import {
   TrendingUp as TrendingUpIcon,
 } from "@mui/icons-material"
 import { keyframes } from "@mui/system"
+
 const drawerWidth = 240;
 const slideIn = keyframes`
   0% {

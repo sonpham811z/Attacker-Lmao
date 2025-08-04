@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
 import {
   Box,
   Card,
@@ -20,30 +19,31 @@ import {
   CircularProgress,
 } from "@mui/material"
 import {
-  Business as BusinessIcon,
+  Person as PersonIcon,
   ArrowBack as ArrowBackIcon,
   Delete as DeleteIcon,
-  AppRegistration as RegisterIcon,
+  HowToReg as RegisterIcon,
+  Shield as ShieldIcon,
 } from "@mui/icons-material"
-import { registerLenderAccountAPI } from "../../../apis"
-import { toast } from "react-toastify"
+import { useNavigate } from "react-router-dom"
+import { registerValidatorAccountAPI  } from "../../../apis"
 
-const LenderRegister = () => {
+const ValidatorRegister = () => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
-  const [uploadedLogo, setUploadedLogo] = useState(null)
-  const [logoPreview, setLogoPreview] = useState(null)
+  const [uploadedAvatar, setUploadedAvatar] = useState(null)
+  const [avatarPreview, setAvatarPreview] = useState(null)
 
   const [formData, setFormData] = useState({
-    companyName: "",
-    taxId: "",
-    companyEmail: "",
-    companyPhone: "",
-    companyAddress: "",
+    name: "",
+    registrationCode: "",
+    address: "",
+    email: "",
+    phone: "",
+    iso: "",
     password: "",
     confirmPassword: "",
-    companyWebsite: "",
   })
 
   const [errors, setErrors] = useState({})
@@ -62,72 +62,77 @@ const LenderRegister = () => {
     }
   }
 
-  const handleLogoUpload = (event) => {
+  const handleAvatarUpload = (event) => {
     const file = event.target.files[0]
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        setErrors({ ...errors, logo: "File size must not exceed 5MB" })
+        setErrors({ ...errors, avatar: "Kích thước file không được vượt quá 5MB" })
         return
       }
 
-      setUploadedLogo(file)
+      setUploadedAvatar(file)
       const reader = new FileReader()
       reader.onload = (e) => {
-        setLogoPreview(e.target.result)
+        setAvatarPreview(e.target.result)
       }
       reader.readAsDataURL(file)
-      setErrors({ ...errors, logo: "" })
+      setErrors({ ...errors, avatar: "" })
     }
   }
 
-  const removeLogo = () => {
-    setUploadedLogo(null)
-    setLogoPreview(null)
+  const removeAvatar = () => {
+    setUploadedAvatar(null)
+    setAvatarPreview(null)
   }
 
   const validateForm = () => {
     const newErrors = {}
 
-    if (!formData.companyName.trim()) {
-      newErrors.companyName = "Please enter your company name"
+    if (!formData.name.trim()) {
+      newErrors.name = "Vui lòng nhập tên của bạn"
     }
 
-    if (!formData.taxId.trim()) {
-      newErrors.taxId = "Please enter your tax ID number"
-    } else if (!/^[0-9]{10,13}$/.test(formData.taxId)) {
-      newErrors.taxId = "Tax ID must be 10-13 digits"
+    if (!formData.registrationCode.trim()) {
+      newErrors.registrationCode = "Vui lòng nhập mã đăng ký"
+    } else if (!/^[A-Z0-9]{6,12}$/.test(formData.registrationCode)) {
+      newErrors.registrationCode = "Mã đăng ký phải có 6-12 ký tự (chữ hoa và số)"
     }
 
-    if (!formData.companyEmail.trim()) {
-      newErrors.companyEmail = "Please enter your company email"
-    } else if (!/\S+@\S+\.\S+/.test(formData.companyEmail)) {
-      newErrors.companyEmail = "Please enter a valid email address"
+    if (!formData.email.trim()) {
+      newErrors.email = "Vui lòng nhập email"
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Vui lòng nhập email hợp lệ"
     }
 
-    if (!formData.companyPhone.trim()) {
-      newErrors.companyPhone = "Please enter your company phone number"
-    } else if (!/^[0-9]{10,11}$/.test(formData.companyPhone)) {
-      newErrors.companyPhone = "Please enter a valid phone number"
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Vui lòng nhập số điện thoại"
+    } else if (!/^[0-9]{10,11}$/.test(formData.phone)) {
+      newErrors.phone = "Vui lòng nhập số điện thoại hợp lệ (10-11 số)"
     }
 
-    if (!formData.companyAddress.trim()) {
-      newErrors.companyAddress = "Please enter your contact address"
+    if (!formData.address.trim()) {
+      newErrors.address = "Vui lòng nhập địa chỉ"
+    }
+
+
+    if (!formData.iso.trim()) {
+      newErrors.iso = "Vui lòng nhập thông tin ISO"
     }
 
     if (!formData.password.trim()) {
-      newErrors.password = "Please enter a password"
-    } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters"
-    }
+        newErrors.password = "Please enter a password"
+      } else if (formData.password.length < 8) {
+        newErrors.password = "Password must be at least 8 characters"
+      }
+  
+      if (!formData.confirmPassword.trim()) {
+        newErrors.confirmPassword = "Please confirm your password"
+      } else if (formData.confirmPassword !== formData.password) {
+        newErrors.confirmPassword = "Passwords do not match"
+      }
 
-    if (!formData.confirmPassword.trim()) {
-      newErrors.confirmPassword = "Please confirm your password"
-    } else if (formData.confirmPassword !== formData.password) {
-      newErrors.confirmPassword = "Passwords do not match"
-    }
-
-    if (!uploadedLogo) {
-      newErrors.logo = "Please upload your company logo"
+    if (!uploadedAvatar) {
+      newErrors.avatar = "Vui lòng tải lên ảnh đại diện"
     }
 
     setErrors(newErrors)
@@ -140,7 +145,7 @@ const LenderRegister = () => {
     }
 
     if (!agreedToTerms) {
-      setErrors({ terms: "Please agree to the terms and conditions" })
+      setErrors({ terms: "Vui lòng đồng ý với điều khoản và điều kiện" })
       return
     }
 
@@ -153,15 +158,16 @@ const LenderRegister = () => {
         formDataToSend.append(key, formData[key])
       }
 
-      if (uploadedLogo) {
-        formDataToSend.append("companyLogo", uploadedLogo)
+      if (uploadedAvatar) {
+        formDataToSend.append("avatar", uploadedAvatar)
       }
 
-      await registerLenderAccountAPI(formDataToSend)
-      navigate(`/lender/verify-otp?Registeremail=${formData.companyEmail}`)
+      await registerValidatorAccountAPI(formDataToSend)
+      navigate(`/validator/verify-otp?Registeremail=${formData.email}`)
+
+      console.log("Đăng ký thành công", formData)
     } catch (error) {
-      toast.error("Registration error")
-      console.log(error)
+      console.error("Lỗi đăng ký:", error)
     } finally {
       setLoading(false)
     }
@@ -169,29 +175,27 @@ const LenderRegister = () => {
 
   const isFormValid = () => {
     return (
-      formData.companyName &&
-      formData.taxId &&
-      formData.companyEmail &&
-      formData.companyPhone &&
-      formData.companyAddress &&
-      formData.password &&
-      formData.confirmPassword &&
-      formData.password === formData.confirmPassword &&
-      uploadedLogo &&
+      formData.name &&
+      formData.registrationCode &&
+      formData.email &&
+      formData.phone &&
+      formData.address &&
+      formData.iso &&
+      uploadedAvatar &&
       agreedToTerms &&
       Object.keys(errors).length === 0
     )
   }
 
-  const completedFields = Object.values(formData).filter((value) => value.trim()).length + (uploadedLogo ? 1 : 0)
-  const progress = (completedFields / 12) * 100
+  const completedFields = Object.values(formData).filter((value) => value.trim()).length + (uploadedAvatar ? 1 : 0)
+  const progress = (completedFields / 7) * 100
 
   return (
     <Box
       sx={{
         minHeight: "100vh",
         width: "100vw",
-        bgcolor: "#f8f9fa",
+        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
         py: 4,
         px: 0,
         m: 0,
@@ -200,20 +204,21 @@ const LenderRegister = () => {
         alignItems: "center",
       }}
     >
-      <Container maxWidth="sm" sx={{ width: "100%" }}>
+      <Container maxWidth="md" sx={{ width: "100%" }}>
         {/* Header */}
         <Fade in={true} timeout={600}>
           <Box sx={{ mb: 4, position: "relative", textAlign: "center" }}>
             <IconButton
-              onClick={() => navigate("/register")}
+              onClick={() => window.history.back()}
               sx={{
                 position: "absolute",
                 left: 0,
                 top: 0,
-                bgcolor: "white",
-                border: "1px solid #e9ecef",
+                bgcolor: "rgba(255, 255, 255, 0.9)",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+                backdropFilter: "blur(10px)",
                 "&:hover": {
-                  bgcolor: "#f8f9fa",
+                  bgcolor: "rgba(255, 255, 255, 1)",
                 },
               }}
             >
@@ -223,55 +228,66 @@ const LenderRegister = () => {
             <Box>
               <Avatar
                 sx={{
-                  width: 48,
-                  height: 48,
+                  width: 64,
+                  height: 64,
                   mx: "auto",
-                  mb: 2,
-                  bgcolor: "#1976d2",
+                  mb: 3,
+                  background: "linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)",
                   color: "white",
+                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
                 }}
               >
-                <BusinessIcon />
+                <ShieldIcon sx={{ fontSize: 32 }} />
               </Avatar>
 
               <Typography
-                variant="h4"
+                variant="h3"
                 sx={{
-                  fontWeight: 600,
-                  color: "#1565c0",
-                  mb: 1,
+                  fontWeight: 700,
+                  color: "white",
+                  mb: 2,
+                  textShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
                 }}
               >
-                Lender Registration
+                Đăng Ký Validator
               </Typography>
 
               <Typography
-                variant="body1"
+                variant="h6"
                 sx={{
-                  color: "#546e7a",
-                  mb: 3,
+                  color: "rgba(255, 255, 255, 0.9)",
+                  mb: 4,
+                  fontWeight: 400,
                 }}
               >
-                Register your company to start providing lending services
+                Đăng ký để trở thành validator chính thức trong hệ thống
               </Typography>
 
               {/* Progress Bar */}
-              <Box sx={{ maxWidth: 400, mx: "auto" }}>
+              <Box sx={{ maxWidth: 500, mx: "auto" }}>
                 <LinearProgress
                   variant="determinate"
                   value={progress}
                   sx={{
-                    height: 6,
-                    borderRadius: 3,
-                    bgcolor: "#e3f2fd",
+                    height: 8,
+                    borderRadius: 4,
+                    bgcolor: "rgba(255, 255, 255, 0.2)",
                     "& .MuiLinearProgress-bar": {
-                      bgcolor: "#1976d2",
-                      borderRadius: 3,
+                      background: "linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)",
+                      borderRadius: 4,
                     },
                   }}
                 />
-                <Typography variant="caption" sx={{ color: "#546e7a", mt: 1, display: "block" }}>
-                  {Math.round(progress)}% Complete
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "rgba(255, 255, 255, 0.9)",
+                    mt: 1,
+                    display: "block",
+                    fontWeight: 500,
+                  }}
+                >
+                  {Math.round(progress)}% hoàn thành
                 </Typography>
               </Box>
             </Box>
@@ -282,39 +298,40 @@ const LenderRegister = () => {
         <Fade in={true} timeout={800}>
           <Card
             sx={{
-              bgcolor: "white",
-              borderRadius: 3,
-              border: "1px solid #e3f2fd",
-              boxShadow: "0 4px 20px rgba(25, 118, 210, 0.08)",
+              bgcolor: "rgba(255, 255, 255, 0.95)",
+              borderRadius: 4,
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+              backdropFilter: "blur(10px)",
             }}
           >
-            <CardContent sx={{ p: 4 }}>
+            <CardContent sx={{ p: 5 }}>
               <Grid container spacing={4} justifyContent="center">
-                {/* Company Logo */}
+                {/* Avatar Upload */}
                 <Grid item xs={12}>
                   <Typography
-                    variant="h6"
+                    variant="h5"
                     sx={{
                       fontWeight: 600,
-                      color: "#1565c0",
+                      color: "#2c3e50",
                       mb: 3,
                       textAlign: "center",
                     }}
                   >
-                    Company Logo
+                    Ảnh Đại Diện
                   </Typography>
 
                   <Box
                     sx={{
-                      border: `2px dashed ${errors.logo ? "#f44336" : "#e3f2fd"}`,
-                      borderRadius: 2,
+                      border: `3px dashed ${errors.avatar ? "#f44336" : "#e3f2fd"}`,
+                      borderRadius: 3,
                       p: 4,
                       textAlign: "center",
-                      bgcolor: errors.logo ? "rgba(244, 67, 54, 0.02)" : "#fafbfc",
+                      bgcolor: errors.avatar ? "rgba(244, 67, 54, 0.02)" : "#fafbfc",
                       cursor: "pointer",
                       position: "relative",
                       transition: "all 0.3s ease",
-                      minHeight: 300,
+                      minHeight: 280,
                       display: "flex",
                       flexDirection: "column",
                       justifyContent: "center",
@@ -322,16 +339,19 @@ const LenderRegister = () => {
                       maxWidth: 400,
                       mx: "auto",
                       "&:hover": {
-                        borderColor: errors.logo ? "#f44336" : "#1976d2",
-                        bgcolor: errors.logo ? "rgba(244, 67, 54, 0.04)" : "rgba(25, 118, 210, 0.02)",
+                        borderColor: errors.avatar ? "#f44336" : "#667eea",
+                        bgcolor: errors.avatar ? "rgba(244, 67, 54, 0.04)" : "rgba(102, 126, 234, 0.02)",
+                        transform: "translateY(-2px)",
+                        boxShadow: "0 8px 25px rgba(102, 126, 234, 0.15)",
                       },
                     }}
                   >
-                    <input
+                    <Box
+                      component="input"
                       type="file"
                       accept="image/*"
-                      onChange={handleLogoUpload}
-                      style={{
+                      onChange={handleAvatarUpload}
+                      sx={{
                         position: "absolute",
                         top: 0,
                         left: 0,
@@ -342,24 +362,25 @@ const LenderRegister = () => {
                       }}
                     />
 
-                    {logoPreview ? (
+                    {avatarPreview ? (
                       <Box sx={{ position: "relative" }}>
                         <Avatar
-                          src={logoPreview}
+                          src={avatarPreview}
                           sx={{
-                            width: 120,
-                            height: 120,
+                            width: 140,
+                            height: 140,
                             mx: "auto",
                             mb: 2,
-                            border: "3px solid #1976d2",
-                            borderRadius: 2,
+                            border: "4px solid #667eea",
+                            borderRadius: 3,
+                            boxShadow: "0 4px 20px rgba(102, 126, 234, 0.3)",
                           }}
                           variant="rounded"
                         />
                         <IconButton
                           onClick={(e) => {
                             e.stopPropagation()
-                            removeLogo()
+                            removeAvatar()
                           }}
                           sx={{
                             position: "absolute",
@@ -367,10 +388,11 @@ const LenderRegister = () => {
                             right: -10,
                             bgcolor: "#f44336",
                             color: "white",
-                            width: 32,
-                            height: 32,
+                            width: 36,
+                            height: 36,
                             "&:hover": {
                               bgcolor: "#d32f2f",
+                              transform: "scale(1.1)",
                             },
                           }}
                         >
@@ -378,178 +400,188 @@ const LenderRegister = () => {
                         </IconButton>
                       </Box>
                     ) : (
-                      <>
-                        <BusinessIcon sx={{ fontSize: 48, color: "#90a4ae", mb: 2 }} />
-                        <Typography variant="h6" sx={{ color: "#1565c0", fontWeight: 500, mb: 1 }}>
-                          Upload Company Logo
+                      <Box>
+                        <PersonIcon sx={{ fontSize: 60, color: "#90a4ae", mb: 2 }} />
+                        <Typography variant="h6" sx={{ color: "#2c3e50", fontWeight: 600, mb: 1 }}>
+                          Tải lên ảnh đại diện
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Click or drag to upload (Max 5MB)
+                          Nhấp hoặc kéo thả để tải lên (Tối đa 5MB)
                         </Typography>
-                      </>
+                      </Box>
                     )}
                   </Box>
 
-                  {errors.logo && (
-                    <Typography variant="body2" color="error" sx={{ mt: 1, textAlign: "center" }}>
-                      {errors.logo}
+                  {errors.avatar && (
+                    <Typography variant="body2" color="error" sx={{ mt: 2, textAlign: "center" }}>
+                      {errors.avatar}
                     </Typography>
                   )}
                 </Grid>
 
-                {/* Company Information */}
+                {/* Form Fields */}
                 <Grid item xs={12}>
                   <Typography
-                    variant="h6"
+                    variant="h5"
                     sx={{
                       fontWeight: 600,
-                      color: "#1565c0",
-                      mb: 3,
+                      color: "#2c3e50",
+                      mb: 4,
                       textAlign: "center",
                     }}
                   >
-                    Company Information
+                    Thông Tin Cá Nhân
                   </Typography>
 
                   <Grid container spacing={3} justifyContent="center">
-                    <Grid item xs={12} sm={8}>
+                    <Grid item xs={12} md={6}>
                       <TextField
                         fullWidth
-                        label="Company Name"
-                        value={formData.companyName}
-                        onChange={handleInputChange("companyName")}
-                        error={!!errors.companyName}
-                        helperText={errors.companyName}
+                        label="Tên đầy đủ"
+                        placeholder="Nhập tên đầy đủ của bạn"
+                        value={formData.name}
+                        onChange={handleInputChange("name")}
+                        error={!!errors.name}
+                        helperText={errors.name}
                         sx={{
                           "& .MuiOutlinedInput-root": {
                             borderRadius: 2,
                             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                              borderColor: "#1976d2",
+                              borderColor: "#667eea",
                             },
                           },
                           "& .MuiInputLabel-root.Mui-focused": {
-                            color: "#1976d2",
+                            color: "#667eea",
                           },
                         }}
                       />
                     </Grid>
 
-                    <Grid item xs={12} sm={8}>
+                    <Grid item xs={12} md={6}>
                       <TextField
                         fullWidth
-                        label="Tax ID Number"
-                        value={formData.taxId}
-                        onChange={handleInputChange("taxId")}
-                        error={!!errors.taxId}
-                        helperText={errors.taxId}
+                        label="Mã đăng ký"
+                        placeholder="VD: VAL123456"
+                        value={formData.registrationCode}
+                        onChange={handleInputChange("registrationCode")}
+                        error={!!errors.registrationCode}
+                        helperText={errors.registrationCode}
+                        inputProps={{ style: { textTransform: "uppercase" } }}
                         sx={{
                           "& .MuiOutlinedInput-root": {
                             borderRadius: 2,
                             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                              borderColor: "#1976d2",
+                              borderColor: "#667eea",
                             },
                           },
                           "& .MuiInputLabel-root.Mui-focused": {
-                            color: "#1976d2",
+                            color: "#667eea",
                           },
                         }}
                       />
                     </Grid>
 
-                    <Grid item xs={12} sm={8}>
+                    <Grid item xs={12} md={6}>
                       <TextField
                         fullWidth
-                        label="Company Email Address"
+                        label="Email"
                         type="email"
-                        value={formData.companyEmail}
-                        onChange={handleInputChange("companyEmail")}
-                        error={!!errors.companyEmail}
-                        helperText={errors.companyEmail}
+                        placeholder="example@email.com"
+                        value={formData.email}
+                        onChange={handleInputChange("email")}
+                        error={!!errors.email}
+                        helperText={errors.email}
                         sx={{
                           "& .MuiOutlinedInput-root": {
                             borderRadius: 2,
                             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                              borderColor: "#1976d2",
+                              borderColor: "#667eea",
                             },
                           },
                           "& .MuiInputLabel-root.Mui-focused": {
-                            color: "#1976d2",
+                            color: "#667eea",
                           },
                         }}
                       />
                     </Grid>
 
-                    <Grid item xs={12} sm={8}>
+                    <Grid item xs={12} md={6}>
                       <TextField
                         fullWidth
-                        label="Company Phone Number"
-                        value={formData.companyPhone}
-                        onChange={handleInputChange("companyPhone")}
-                        error={!!errors.companyPhone}
-                        helperText={errors.companyPhone}
+                        label="Số điện thoại"
+                        placeholder="0123456789"
+                        value={formData.phone}
+                        onChange={handleInputChange("phone")}
+                        error={!!errors.phone}
+                        helperText={errors.phone}
                         sx={{
                           "& .MuiOutlinedInput-root": {
                             borderRadius: 2,
                             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                              borderColor: "#1976d2",
+                              borderColor: "#667eea",
                             },
                           },
                           "& .MuiInputLabel-root.Mui-focused": {
-                            color: "#1976d2",
+                            color: "#667eea",
                           },
                         }}
                       />
                     </Grid>
 
-                    <Grid item xs={12} sm={8}>
+                    <Grid item xs={12}>
                       <TextField
                         fullWidth
-                        label="Contact Address"
-                        value={formData.companyAddress}
-                        onChange={handleInputChange("companyAddress")}
-                        error={!!errors.companyAddress}
-                        helperText={errors.companyAddress}
+                        label="Địa chỉ"
+                        placeholder="Nhập địa chỉ đầy đủ"
+                        value={formData.address}
+                        onChange={handleInputChange("address")}
+                        error={!!errors.address}
+                        helperText={errors.address}
+                        rows={1}
                         sx={{
                           "& .MuiOutlinedInput-root": {
                             borderRadius: 2,
                             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                              borderColor: "#1976d2",
+                              borderColor: "#667eea",
                             },
                           },
                           "& .MuiInputLabel-root.Mui-focused": {
-                            color: "#1976d2",
+                            color: "#667eea",
                           },
                         }}
                       />
                     </Grid>
 
-                    <Grid item xs={12} sm={8}>
+
+                    <Grid item xs={12} md={6}>
                       <TextField
                         fullWidth
-                        label="Company website"
-                        value={formData.companyWebsite}
-                        onChange={handleInputChange("companyWebsite")}
-                        error={!!errors.contactAddress}
-                        helperText={errors.contactAddress}
+                        label="ISO"
+                        placeholder="VD: ISO 27001:2013"
+                        value={formData.iso}
+                        onChange={handleInputChange("iso")}
+                        error={!!errors.iso}
+                        helperText={errors.iso}
                         sx={{
                           "& .MuiOutlinedInput-root": {
                             borderRadius: 2,
                             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                              borderColor: "#1976d2",
+                              borderColor: "#667eea",
                             },
                           },
                           "& .MuiInputLabel-root.Mui-focused": {
-                            color: "#1976d2",
+                            color: "#667eea",
                           },
                         }}
                       />
                     </Grid>
 
-                    <Grid item xs={12} sm={8}>
+                    <Grid item xs={12} md={6}>
                       <TextField
                         fullWidth
-                        label="Password"
                         type="password"
+                        label="Password"
+                        placeholder="Password"
                         value={formData.password}
                         onChange={handleInputChange("password")}
                         error={!!errors.password}
@@ -558,21 +590,22 @@ const LenderRegister = () => {
                           "& .MuiOutlinedInput-root": {
                             borderRadius: 2,
                             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                              borderColor: "#1976d2",
+                              borderColor: "#667eea",
                             },
                           },
                           "& .MuiInputLabel-root.Mui-focused": {
-                            color: "#1976d2",
+                            color: "#667eea",
                           },
                         }}
                       />
                     </Grid>
 
-                    <Grid item xs={12} sm={8}>
+                    <Grid item xs={12} md={6}>
                       <TextField
                         fullWidth
-                        label="Confirm Password"
-                        type="password"
+                         type="password"
+                        label="Confirm password"
+                        placeholder="Confirm password"
                         value={formData.confirmPassword}
                         onChange={handleInputChange("confirmPassword")}
                         error={!!errors.confirmPassword}
@@ -581,15 +614,16 @@ const LenderRegister = () => {
                           "& .MuiOutlinedInput-root": {
                             borderRadius: 2,
                             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                              borderColor: "#1976d2",
+                              borderColor: "#667eea",
                             },
                           },
                           "& .MuiInputLabel-root.Mui-focused": {
-                            color: "#1976d2",
+                            color: "#667eea",
                           },
                         }}
                       />
                     </Grid>
+
                   </Grid>
                 </Grid>
 
@@ -597,11 +631,11 @@ const LenderRegister = () => {
                 <Grid item xs={12}>
                   <Box
                     sx={{
-                      bgcolor: "#f3f8ff",
-                      borderRadius: 2,
-                      p: 3,
-                      border: `1px solid ${errors.terms ? "#f44336" : "#e3f2fd"}`,
-                      maxWidth: 400,
+                      background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+                      borderRadius: 3,
+                      p: 4,
+                      border: `2px solid ${errors.terms ? "#f44336" : "transparent"}`,
+                      maxWidth: 600,
                       mx: "auto",
                     }}
                   >
@@ -616,46 +650,50 @@ const LenderRegister = () => {
                             }
                           }}
                           sx={{
-                            color: "#1976d2",
+                            color: "#667eea",
                             "&.Mui-checked": {
-                              color: "#1976d2",
+                              color: "#667eea",
                             },
                           }}
                         />
                       }
                       label={
-                        <Typography variant="body2" sx={{ color: "#1565c0" }}>
-                          I agree to the{" "}
+                        <Typography variant="body1" sx={{ color: "#2c3e50", fontWeight: 500 }}>
+                          Tôi đồng ý với{" "}
                           <Button
                             variant="text"
                             sx={{
-                              color: "#1976d2",
+                              color: "#667eea",
                               textDecoration: "underline",
                               p: 0,
                               minWidth: "auto",
                               textTransform: "none",
+                              fontWeight: 600,
                               "&:hover": {
                                 bgcolor: "transparent",
+                                color: "#5a67d8",
                               },
                             }}
                           >
-                            Terms and Conditions
+                            Điều khoản và Điều kiện
                           </Button>{" "}
-                          and{" "}
+                          và{" "}
                           <Button
                             variant="text"
                             sx={{
-                              color: "#1976d2",
+                              color: "#667eea",
                               textDecoration: "underline",
                               p: 0,
                               minWidth: "auto",
                               textTransform: "none",
+                              fontWeight: 600,
                               "&:hover": {
                                 bgcolor: "transparent",
+                                color: "#5a67d8",
                               },
                             }}
                           >
-                            Lender Agreement
+                            Thỏa thuận Validator
                           </Button>
                         </Typography>
                       }
@@ -670,47 +708,53 @@ const LenderRegister = () => {
 
                 {/* Action Button */}
                 <Grid item xs={12}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    size="large"
-                    onClick={handleRegister}
-                    sx={{
-                      bgcolor: "#1976d2",
-                      width: "450px",
-                      height: "40px",
-                      color: "white",
-                      borderRadius: 2,
-                      py: 2,
-                      fontSize: "1rem",
-                      fontWeight: 600,
-                      textTransform: "none",
-                      transition: "all 0.3s ease",
-                      "&:hover": {
-                        bgcolor: "#1565c0",
-                        transform: isFormValid() ? "translateY(-1px)" : "none",
-                        boxShadow: isFormValid() ? "0 4px 12px rgba(25, 118, 210, 0.3)" : "none",
-                      },
-                    }}
-                  >
-                    {loading ? (
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                        <CircularProgress size={20} color="inherit" />
-                        Processing Registration...
-                      </Box>
-                    ) : (
-                      <>
-                        <RegisterIcon sx={{ mr: 1 }} />
-                        Register Company
-                      </>
-                    )}
-                  </Button>
+                  <Box sx={{ display: "flex", justifyContent: "center" }}>
+                    <Button
+                      variant="contained"
+                      size="large"
+                      onClick={handleRegister}
+                    //   disabled={!isFormValid() }
+                      sx={{
+                        background: "linear-gradient(45deg, #667eea 30%, #764ba2 90%)",
+                        width: "400px",
+                        height: "56px",
+                        color: "white",
+                        borderRadius: 3,
+                        fontSize: "1.1rem",
+                        fontWeight: 600,
+                        textTransform: "none",
+                        transition: "all 0.3s ease",
+                        boxShadow: "0 4px 20px rgba(102, 126, 234, 0.3)",
+                        "&:hover": {
+                          background: "linear-gradient(45deg, #5a67d8 30%, #667eea 90%)",
+                          transform: isFormValid() ? "translateY(-2px)" : "none",
+                          boxShadow: isFormValid() ? "0 8px 25px rgba(102, 126, 234, 0.4)" : "none",
+                        },
+                        "&:disabled": {
+                          background: "linear-gradient(45deg, #bbb 30%, #999 90%)",
+                          color: "rgba(255, 255, 255, 0.7)",
+                        },
+                      }}
+                    >
+                      {loading ? (
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                          <CircularProgress size={24} color="inherit" />
+                          Đang xử lý đăng ký...
+                        </Box>
+                      ) : (
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <RegisterIcon />
+                          Đăng Ký Validator
+                        </Box>
+                      )}
+                    </Button>
+                  </Box>
                 </Grid>
               </Grid>
             </CardContent>
           </Card>
         </Fade>
-        <Box sx={{ textAlign: "center", mt: 2 }}>
+        <Box sx={{ textAlign: "center", mt: 8 }}>
             <Typography
               variant="body2"
               sx={{
@@ -722,14 +766,14 @@ const LenderRegister = () => {
               <Button
                 variant="text"
                 sx={{
-                  color: "#4285f4",
+                  color: "#0d3a84",
                   fontWeight: 500,
                   textTransform: "none",
                   "&:hover": {
-                    bgcolor: "rgba(66, 133, 244, 0.04)",
+                    bgcolor: "hsla(217, 28.00%, 85.30%, 0.04)",
                   },
                 }}
-                onClick={() => navigate("/login/lender")}
+                onClick={() => navigate("/login/validator")}
               >
                 Sign in here
               </Button>
@@ -740,4 +784,4 @@ const LenderRegister = () => {
   )
 }
 
-export default LenderRegister
+export default ValidatorRegister

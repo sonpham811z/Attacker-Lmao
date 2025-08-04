@@ -22,7 +22,7 @@ import {
   Refresh as RefreshIcon,
   CheckCircle as CheckIcon,
 } from "@mui/icons-material"
-import { verifyAccountAPI, verifyAccountLendersAPI } from "../../apis"
+import { verifyAccountAPI, verifyAccountLendersAPI, verifyAccountValidatorsAPI } from "../../apis"
 
 const OTPVerification = () => {
   const navigate = useNavigate()
@@ -106,6 +106,9 @@ const OTPVerification = () => {
         await verifyAccountLendersAPI({ otpCode: otpString, email: registerdEmail })
         setSuccess(true)
         setTimeout(() => navigate('/login/lender'), 2000)
+      } else if (role === 'validator') {
+        await verifyAccountValidatorsAPI({ otpCode: otpString, email: registerdEmail})
+        setTimeout(() => navigate('/login/validator'), 2000)
       } else {
         throw new Error('Unsupported role')
       }

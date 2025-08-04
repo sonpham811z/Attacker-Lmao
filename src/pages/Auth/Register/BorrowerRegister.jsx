@@ -633,7 +633,34 @@ const BorrowerRegister = () => {
             </CardContent>
           </Card>
         </Fade>
+        <Box sx={{ textAlign: "center", mt: 8 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "#8e9aaf",
+                fontSize: "0.9rem",
+              }}
+            >
+              Already have an account?{" "}
+              <Button
+                variant="text"
+                sx={{
+                  color: "#4285f4",
+                  fontWeight: 500,
+                  textTransform: "none",
+                  "&:hover": {
+                    bgcolor: "rgba(66, 133, 244, 0.04)",
+                  },
+                }}
+                onClick={() => navigate("/login")}
+              >
+                Sign in here
+              </Button>
+            </Typography>
+          </Box>
       </Container>
+
+      
     </Box>
   )
 }

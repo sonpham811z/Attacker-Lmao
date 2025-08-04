@@ -19,7 +19,7 @@ createRoot(document.getElementById('root')).render(
       <StrictMode>
         <App />
         <ToastContainer/>
-      </StrictMode>,
+      </StrictMode>
 
     </PersistGate>
 
