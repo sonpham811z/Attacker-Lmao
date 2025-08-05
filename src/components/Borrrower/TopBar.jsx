@@ -1,19 +1,6 @@
 "use client"
 
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Box,
-  IconButton,
-  Avatar,
-  Button,
-  Divider,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-} from "@mui/material"
+import { AppBar, Toolbar, Typography, Box, IconButton, Badge, Avatar, Button, Divider } from "@mui/material"
 import {
   NotificationsActive as NotificationIcon,
   AccountBalanceWallet as WalletIcon,
@@ -21,17 +8,10 @@ import {
   ExpandMore as ExpandMoreIcon,
   Brightness4 as DarkModeIcon,
   Language as LanguageIcon,
-  Logout as LogoutIcon,
-  Person as PersonIcon,
-  Settings as SettingsIcon,
 } from "@mui/icons-material"
 import { useState, useRef } from "react"
 import { useLocation } from "react-router-dom"
 import { keyframes } from "@mui/system"
-import { useSelector } from "react-redux"
-import { logOutAPI, selectCurrentBorrower } from "../../redux/borrowerSlice"
-import { useDispatch } from "react-redux"
-import { toast } from "react-toastify"
 
 const pulse = keyframes`
   0% {
@@ -69,12 +49,8 @@ const textGlow = keyframes`
 const TopBar = () => {
   const [walletConnected, setWalletConnected] = useState(false)
   const [walletAddress, setWalletAddress] = useState("")
-  const [anchorEl, setAnchorEl] = useState(null)
   const { pathname } = useLocation()
   const isInitialMount = useRef(true)
-  const borrower = useSelector(selectCurrentBorrower)
-  const dispatch = useDispatch()
-  
 
   // Map routes to titles
   const routeToTitle = {
@@ -123,40 +99,6 @@ const TopBar = () => {
 
   const formatAddress = (address) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`
-  }
-
-  // Handle user menu
-  const handleUserMenuClick = (event) => {
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleUserMenuClose = () => {
-    setAnchorEl(null)
-  }
-
-  const handleLogout = async() => {
-    try {
-      dispatch(logOutAPI())
-      handleUserMenuClose()
-    } catch (error) {
-      console.log(error)
-      toast.error("Logout error")
-    }
-   
-   
-    // You can dispatch a logout action or redirect to login page
-  }
-
-  const handleProfile = () => {
-    // Add your profile navigation logic here
-    console.log("Navigate to profile...")
-    handleUserMenuClose()
-  }
-
-  const handleSettings = () => {
-    // Add your settings navigation logic here
-    console.log("Navigate to settings...")
-    handleUserMenuClose()
   }
 
   return (
@@ -377,7 +319,7 @@ const TopBar = () => {
 
           <Divider orientation="vertical" flexItem sx={{ mx: 1, bgcolor: "#dee2e6" }} />
 
-          {/* User Profile with Dropdown */}
+          {/* User Profile */}
           <Box
             sx={{
               display: "flex",
@@ -392,7 +334,6 @@ const TopBar = () => {
                 transform: "translateY(-1px)",
               },
             }}
-            onClick={handleUserMenuClick}
           >
             <Box sx={{ textAlign: "right" }}>
               <Typography
@@ -403,7 +344,7 @@ const TopBar = () => {
                   lineHeight: 1.2,
                 }}
               >
-                {borrower.fullName}
+                Sơn Phạm
               </Typography>
               <Typography
                 variant="caption"
@@ -416,7 +357,7 @@ const TopBar = () => {
               </Typography>
             </Box>
             <Avatar
-              src={borrower.avatar}
+              src="https://res.cloudinary.com/sonpham811205/image/upload/v1745545657/dataEmployer/s0pxwnofrg8at89x8bjq.jpg"
               sx={{
                 width: 42,
                 height: 42,
@@ -433,91 +374,12 @@ const TopBar = () => {
                 color: "#6c757d",
                 fontSize: 20,
                 transition: "transform 0.3s ease",
-                transform: anchorEl ? "rotate(180deg)" : "rotate(0deg)",
+                "&:hover": {
+                  transform: "rotate(180deg)",
+                },
               }}
             />
           </Box>
-
-          {/* User Dropdown Menu */}
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleUserMenuClose}
-            PaperProps={{
-              sx: {
-                mt: 1,
-                minWidth: 200,
-                borderRadius: 2,
-                boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
-                border: "1px solid #e9ecef",
-                "& .MuiMenuItem-root": {
-                  px: 2,
-                  py: 1.5,
-                  borderRadius: 1,
-                  mx: 1,
-                  my: 0.5,
-                  transition: "all 0.2s ease",
-                  "&:hover": {
-                    bgcolor: "#f8f9fa",
-                    transform: "translateX(4px)",
-                  },
-                },
-              },
-            }}
-            transformOrigin={{ horizontal: "right", vertical: "top" }}
-            anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-          >
-            <MenuItem onClick={handleProfile}>
-              <ListItemIcon>
-                <PersonIcon sx={{ fontSize: 20, color: "#6c757d" }} />
-              </ListItemIcon>
-              <ListItemText
-                primary="Profile"
-                primaryTypographyProps={{
-                  fontSize: "0.9rem",
-                  fontWeight: 500,
-                }}
-              />
-            </MenuItem>
-
-            <MenuItem onClick={handleSettings}>
-              <ListItemIcon>
-                <SettingsIcon sx={{ fontSize: 20, color: "#6c757d" }} />
-              </ListItemIcon>
-              <ListItemText
-                primary="Settings"
-                primaryTypographyProps={{
-                  fontSize: "0.9rem",
-                  fontWeight: 500,
-                }}
-              />
-            </MenuItem>
-
-            <Divider sx={{ my: 1 }} />
-
-            <MenuItem
-              onClick={handleLogout}
-              sx={{
-                "&:hover": {
-                  bgcolor: "rgba(244, 67, 54, 0.08) !important",
-                  "& .MuiListItemIcon-root, & .MuiListItemText-primary": {
-                    color: "#f44336 !important",
-                  },
-                },
-              }}
-            >
-              <ListItemIcon>
-                <LogoutIcon sx={{ fontSize: 20, color: "#6c757d" }} />
-              </ListItemIcon>
-              <ListItemText
-                primary="Logout"
-                primaryTypographyProps={{
-                  fontSize: "0.9rem",
-                  fontWeight: 500,
-                }}
-              />
-            </MenuItem>
-          </Menu>
         </Box>
       </Toolbar>
     </AppBar>

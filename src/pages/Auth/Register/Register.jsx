@@ -51,7 +51,7 @@ const Register = () => {
       icon: <VerifiedIcon sx={{ fontSize: 32 }} />,
       color: "#f39c12",
       gradient: "linear-gradient(135deg, #f39c12 0%, #e67e22 100%)",
-      path: "/register/validator",
+      path: "/register/verifier",
     },
   ]
 
@@ -302,7 +302,33 @@ const Register = () => {
         </Grid>
 
         {/* Footer */}
-        
+        <Fade in={true} timeout={1200}>
+          <Box sx={{ textAlign: "center", mt: 8 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "#8e9aaf",
+                fontSize: "0.9rem",
+              }}
+            >
+              Already have an account?{" "}
+              <Button
+                variant="text"
+                sx={{
+                  color: "#4285f4",
+                  fontWeight: 500,
+                  textTransform: "none",
+                  "&:hover": {
+                    bgcolor: "rgba(66, 133, 244, 0.04)",
+                  },
+                }}
+                onClick={() => navigate("/login")}
+              >
+                Sign in here
+              </Button>
+            </Typography>
+          </Box>
+        </Fade>
       </Container>
     </Box>
   )

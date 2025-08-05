@@ -22,12 +22,8 @@ import {
   Visibility,
   VisibilityOff,
 } from "@mui/icons-material"
-import { useDispatch } from 'react-redux'
-import { loginBorrowerAPI } from "../../../redux/borrowerSlice"
-import { toast } from "react-toastify"
 
 const Login = () => {
-  const dispatch = useDispatch()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -76,16 +72,13 @@ const Login = () => {
       return
     }
 
-    try {
-      setLoading(true)
-      await dispatch(loginBorrowerAPI(formData)).unwrap();
-      navigate('/borrower/dashboard')
-    } catch (error) {
-      console.log(error)
-      toast.error("Login error")
-    } finally {
+    setLoading(true)
+
+    // Simulate API call
+    setTimeout(() => {
       setLoading(false)
-    }
+      navigate("/dashboard")
+    }, 2000)
   }
 
   const handleTogglePassword = () => {
@@ -393,7 +386,7 @@ const Login = () => {
                 fontSize: "0.9rem",
               }}
             >
-              © 2025 NLC Platform. All rights reserved.
+              © 2024 NLC Platform. All rights reserved.
             </Typography>
           </Box>
         </Fade>

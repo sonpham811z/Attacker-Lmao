@@ -1,8 +1,6 @@
 import { Card, CardContent, Box, Typography, Avatar, Button } from "@mui/material"
 import { Phone as PhoneIcon, Email as EmailIcon, Edit as EditIcon, Person as PersonIcon } from "@mui/icons-material"
-import { border, keyframes } from "@mui/system"
-import { useSelector } from "react-redux"
-import { selectCurrentBorrower } from "../../redux/borrowerSlice"
+import { keyframes } from "@mui/system"
 
 const shimmer = keyframes`
   0% {
@@ -37,8 +35,6 @@ const slideIn = keyframes`
 `
 
 const ProfileSection = () => {
-  const borrower = useSelector(selectCurrentBorrower)
-
   return (
     <Card
       sx={{
@@ -69,7 +65,7 @@ const ProfileSection = () => {
           {/* Profile Avatar with Animation */}
           <Box sx={{ position: "relative" }}>
             <Avatar
-              src={borrower.avatar}
+              src="https://res.cloudinary.com/sonpham811205/image/upload/v1745545657/dataEmployer/s0pxwnofrg8at89x8bjq.jpg"
               sx={{
                 width: 130,
                 height: 130,
@@ -116,7 +112,7 @@ const ProfileSection = () => {
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                {borrower.fullName}
+                Sơn Phạm
               </Typography>
               <Box
                 sx={{
@@ -138,7 +134,7 @@ const ProfileSection = () => {
                 mb: 1,
               }}
             >
-              {borrower.occupation}
+              Software Engineer
             </Typography>
 
             {/* Contact Information with Icons */}
@@ -171,7 +167,7 @@ const ProfileSection = () => {
                   <PhoneIcon sx={{ fontSize: 16, color: "#1976d2" }} />
                 </Box>
                 <Typography variant="body2" sx={{ fontSize: "0.9rem", fontWeight: 500 }}>
-                 {borrower.phoneNumber}
+                  012 345 6789
                 </Typography>
               </Box>
 
@@ -194,7 +190,7 @@ const ProfileSection = () => {
                     width: 32,
                     height: 32,
                     borderRadius: "50%",
-                    bgcolor: "#e3f2fd",
+                    bgcolor: "#fff3e0",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -203,7 +199,7 @@ const ProfileSection = () => {
                   <EmailIcon sx={{ fontSize: 16, color: "#f57c00" }} />
                 </Box>
                 <Typography variant="body2" sx={{ fontSize: "0.9rem", fontWeight: 500 }}>
-                  {borrower.email}
+                  underwriter@example.com
                 </Typography>
               </Box>
             </Box>
