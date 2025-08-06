@@ -140,40 +140,7 @@ const AdminPage = () => {
           fetchStakeInfo(account);
         }
       }} />
-      <Card sx={{ mb: 3, p: 2, borderLeft: '5px solid #c0392b', background: 'linear-gradient(90deg, #ffeaea 0%, #fff3f0 100%)', boxShadow: 3 }}>
-        <CardContent>
-          <Typography variant="h6" fontWeight={600} mb={2} color="error.main">
-            Danh sách báo cáo gian lận
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-          {/* Đã loại bỏ phần hiển thị số dư stake hiện tại */}
-          {(!fraudReports || fraudReports.length === 0) ? (
-            <Typography color="text.secondary">Không có báo cáo gian lận nào.</Typography>
-          ) : (
-            <Box sx={{ maxHeight: 400, overflowY: 'auto', pr: 1 }}>
-              {fraudReports.map((report) => (
-                <Card key={report.id} sx={{ mb: 3, boxShadow: 2, borderLeft: '4px solid #c0392b', background: '#fff' }}>
-                  <CardContent>
-                    <Box display="flex" alignItems="center" mb={1}>
-                      <Chip label={`ID: ${report.id}`} color="error" size="small" sx={{ mr: 2 }} />
-                      <Chip label={report.status} color={report.status === 'Resolved' ? 'success' : 'error'} size="small" />
-                    </Box>
-                    <Typography variant="body1" fontWeight={600} gutterBottom>
-                      <b>Validator:</b> <span style={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>{report.validator}</span>
-                    </Typography>
-                    <Typography variant="body2" gutterBottom>
-                      <b>Bằng chứng:</b> <span style={{ wordBreak: 'break-all' }}>{report.evidence}</span>
-                    </Typography>
-                    <Typography variant="body2" gutterBottom>
-                      <b>Thời gian báo cáo:</b> {report.time ? report.time.toLocaleString() : <span style={{ color: '#888' }}>Không xác định</span>}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              ))}
-            </Box>
-          )}
-        </CardContent>
-      </Card>
+      
     </Box>
   );
 };

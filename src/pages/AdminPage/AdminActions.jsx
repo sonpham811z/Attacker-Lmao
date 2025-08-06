@@ -74,7 +74,7 @@ const AdminActions = () => {
   const [slashStatus, setSlashStatus] = useState("");
   const [deactivateAddress, setDeactivateAddress] = useState("");
   const [deactivateStatus, setDeactivateStatus] = useState("");
-  const [fraudId, setFraudId] = useState("");
+  // Remove manual fraudId and fraudDecision input, use dialog selection
   const [fraudDecision, setFraudDecision] = useState("");
   const [fraudStatus, setFraudStatus] = useState("");
   const [trustedReporter, setTrustedReporter] = useState("");
@@ -82,7 +82,6 @@ const AdminActions = () => {
   const [removeReporter, setRemoveReporter] = useState("");
   const [removeStatus, setRemoveStatus] = useState("");
   const [mispricingThreshold, setMispricingThreshold] = useState("");
-  const [mispricingSlashPercent, setMispricingSlashPercent] = useState("");
   const [mispricingStatus, setMispricingStatus] = useState("");
 
   // State for mispricing reports
@@ -93,6 +92,9 @@ const AdminActions = () => {
 const [loadingFraud, setLoadingFraud] = useState(false);
 const [errorFraud, setErrorFraud] = useState(null);
 const [fraudReports, setFraudReports] = useState([]);
+// State for fraud report dialog
+const [openFraudDetail, setOpenFraudDetail] = useState(false);
+const [selectedFraudReport, setSelectedFraudReport] = useState(null);
   // State for detail dialog
   const [openDetail, setOpenDetail] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
@@ -214,27 +216,33 @@ useEffect(() => {
     fetchFraudReports();
 }, [contract]);
 
-  // Fetch block timestamp, resolved status, tổng số báo cáo và báo cáo đầu tiên khi mở dialog
+  // Fetch block timestamp (report time) for selectedReport
   useEffect(() => {
-    const fetchBlockTimeAndResolved = async () => {
-      if (!selectedReport || !contract) {
+    const fetchReportBlockTimestamp = async () => {
+      if (!selectedReport || !contract || !contract.provider) {
         setBlockTimestamp(null);
+        return;
+      }
+      try {
+        const block = await contract.provider.getBlock(selectedReport.blockNumber);
+        if (block && block.timestamp) setBlockTimestamp(new Date(block.timestamp * 1000));
+        else setBlockTimestamp(null);
+      } catch {
+        setBlockTimestamp(null);
+      }
+    };
+    if (openDetail && selectedReport) fetchReportBlockTimestamp();
+    else setBlockTimestamp(null);
+  }, [openDetail, selectedReport, contract]);
+
+  // Fetch resolved status, tổng số báo cáo và báo cáo đầu tiên khi mở dialog
+  useEffect(() => {
+    const fetchOtherMispricingInfo = async () => {
+      if (!selectedReport || !contract) {
         setReportResolved(false);
         setMispricingCount(null);
         setFirstReport(null);
         return;
-      }
-      try {
-        // Block timestamp
-        const provider = contract.runner || contract.provider;
-        if (!provider) setBlockTimestamp(null);
-        else {
-          const block = await provider.getBlock(selectedReport.blockNumber);
-          if (block && block.timestamp) setBlockTimestamp(new Date(block.timestamp * 1000));
-          else setBlockTimestamp(null);
-        }
-      } catch {
-        setBlockTimestamp(null);
       }
       // Check resolved status from contract
       try {
@@ -245,16 +253,12 @@ useEffect(() => {
       }
       // Lấy tổng số báo cáo mispricing của validator này
       try {
-        // Nếu contract có hàm getMispricingReportCount, dùng:
-        // const count = await contract.getMispricingReportCount(selectedReport.validator);
-        // Nếu không, thử truy cập length property (nếu contract public array)
         let count = null;
         if (contract.mispricingReports && contract.mispricingReports[selectedReport.validator]) {
           count = await contract.mispricingReports[selectedReport.validator].length;
         } else if (contract.getMispricingReportCount) {
           count = await contract.getMispricingReportCount(selectedReport.validator);
         } else {
-          // fallback: thử truy cập như mapping(address => array)
           try {
             let i = 0;
             while (true) {
@@ -277,9 +281,8 @@ useEffect(() => {
         setFirstReport(null);
       }
     };
-    if (openDetail && selectedReport) fetchBlockTimeAndResolved();
+    if (openDetail && selectedReport) fetchOtherMispricingInfo();
     else {
-      setBlockTimestamp(null);
       setReportResolved(false);
       setMispricingCount(null);
       setFirstReport(null);
@@ -367,28 +370,24 @@ useEffect(() => {
     };
     deactivate();
   };
-  const handleResolveFraud = e => {
-    e.preventDefault();
+  // Handle resolving fraud report from dialog selection
+  const handleResolveFraud = async () => {
     setFraudStatus('Đang gửi giao dịch...');
-    const resolve = async () => {
-      if (!contract || !selectedReport || !fraudDecision) {
-        setFraudStatus('Thiếu thông tin hoặc chưa kết nối contract');
-        return;
-      }
-      // Lấy validator và index từ selectedReport (luôn dùng reportIndex để đảm bảo đúng vị trí và liên tục)
-      const validatorAddress = selectedReport.validator;
-      const reportIndex = selectedReport.reportIndex !== undefined ? selectedReport.reportIndex : 0;
-      const decisionValue = fraudDecision === 'true';
-      try {
-        const tx = await contract.resolveFraudReport(validatorAddress, reportIndex, decisionValue);
-        setFraudStatus('Đang chờ xác nhận...');
-        await tx.wait();
-        setFraudStatus('Xử lý thành công!');
-      } catch (err) {
-        setFraudStatus('Xử lý thất bại: ' + (err?.reason || err?.message || ''));
-      }
-    };
-    resolve();
+    if (!contract || !selectedFraudReport || !fraudDecision) {
+      setFraudStatus('Thiếu thông tin hoặc chưa kết nối contract hoặc chưa chọn phán quyết');
+      return;
+    }
+    const validatorAddress = selectedFraudReport.validator;
+    const reportIndex = selectedFraudReport.reportIndex !== undefined ? selectedFraudReport.reportIndex : 0;
+    const decisionValue = fraudDecision === 'true';
+    try {
+      const tx = await contract.resolveFraudReport(validatorAddress, reportIndex, decisionValue);
+      setFraudStatus('Đang chờ xác nhận...');
+      await tx.wait();
+      setFraudStatus('Xử lý thành công!');
+    } catch (err) {
+      setFraudStatus('Xử lý thất bại: ' + (err?.reason || err?.message || ''));
+    }
   };
   const handleAddTrusted = async (e) => {
     e.preventDefault();
@@ -450,15 +449,17 @@ useEffect(() => {
       setRemoveStatus(errorMsg);
     }
   };
+  // Cập nhật ngưỡng phạt giá (setMispricingParameters)
   const handleSetMispricing = async (e) => {
     e.preventDefault();
     setMispricingStatus('Đang gửi giao dịch...');
-    if (!contract || !mispricingThreshold || !mispricingSlashPercent) {
+    if (!contract || !mispricingThreshold) {
       setMispricingStatus('Thiếu thông tin hoặc chưa kết nối contract');
       return;
     }
     try {
-      const tx = await contract.setMispricingParameters(mispricingThreshold, mispricingSlashPercent);
+      // Gọi hàm setMispricingParameters trên contract
+      const tx = await contract.setMispricingParameters(mispricingThreshold);
       setMispricingStatus('Đang chờ xác nhận...');
       await tx.wait();
       setMispricingStatus('Cập nhật ngưỡng phạt giá thành công!');
@@ -641,21 +642,7 @@ try {
                 </form>
               </CardContent>
             </Card>
-            {/* Resolve Fraud Report */}
-            <Card sx={{ p: 2, borderLeft: '6px solid #1976d2', background: 'linear-gradient(90deg, #e3f2fd 0%, #f0f7ff 100%)', boxShadow: 3 }}>
-              <CardContent>
-                <Stack direction="row" alignItems="center" spacing={2} mb={1}>
-                  <VerifiedUserIcon color="primary" />
-                  <Typography variant="h6" fontWeight={700} color="primary.main">Xử lý báo cáo gian lận (resolveFraudReport)</Typography>
-                </Stack>
-                <form onSubmit={handleResolveFraud} style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-                  <TextField required label="ID báo cáo" value={fraudId} onChange={e => setFraudId(e.target.value)} size="small" />
-                  <TextField required label="Phán quyết (true/false)" value={fraudDecision} onChange={e => setFraudDecision(e.target.value)} size="small" />
-                  <Button type="submit" variant="contained" color="primary">Xử lý</Button>
-                  {fraudStatus && <span style={{ marginLeft: 8, color: '#1976d2', fontWeight: 600 }}>{fraudStatus}</span>}
-                </form>
-              </CardContent>
-            </Card>
+          {/* Resolve Fraud Report - now handled via dialog from fraud report list */}
             {/* Add Trusted Reporter */}
             <Card sx={{ p: 2, borderLeft: '6px solid #20bf6b', background: 'linear-gradient(90deg, #e0fff3 0%, #e6fff9 100%)', boxShadow: 3 }}>
               <CardContent>
@@ -693,7 +680,6 @@ try {
                 </Stack>
                 <form onSubmit={handleSetMispricing} style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
                   <TextField required label="Ngưỡng phạt (%)" type="number" value={mispricingThreshold} onChange={e => setMispricingThreshold(e.target.value)} size="small" />
-                  <TextField required label="% phạt (slash %)" type="number" value={mispricingSlashPercent} onChange={e => setMispricingSlashPercent(e.target.value)} size="small" />
                   <Button type="submit" variant="contained" color="secondary">Cập nhật</Button>
                   {mispricingStatus && <span style={{ marginLeft: 8, color: '#f39c12', fontWeight: 600 }}>{mispricingStatus}</span>}
                 </form>
@@ -716,9 +702,7 @@ try {
                   <Typography color="text.secondary">Không có báo cáo mispricing nào.</Typography>
                 ) : (
                   <Box sx={{ maxHeight: 350, overflowY: 'auto', pr: 1 }}>
-                   
-                    {
-                    mispricingReports.map((r) => (
+                    {mispricingReports.map((r) => (
                       <Paper
                         key={r.transactionHash + '-' + r.reportIndex}
                         sx={{ p: 3, mb: 4, minHeight: 110, background: '#fff', borderLeft: '4px solid #f39c12', display: 'flex', flexDirection: 'column', justifyContent: 'center', cursor: 'pointer', transition: 'box-shadow 0.2s', '&:hover': { boxShadow: 6 } }}
@@ -745,6 +729,97 @@ try {
               </CardContent>
             </Card>
           </Box>
+
+          {/* Danh sách báo cáo gian lận */}
+          <Box mt={5}>
+            <Card sx={{ borderLeft: '6px solid #c0392b', background: 'linear-gradient(90deg, #ffeaea 0%, #fff3f0 100%)', boxShadow: 3 }}>
+              <CardContent>
+                <Typography variant="h6" fontWeight={700} color="error.main" mb={2}>
+                  Danh sách báo cáo gian lận
+                </Typography>
+                {loadingFraud ? (
+                  <Typography color="text.secondary">Đang tải...</Typography>
+                ) : errorFraud ? (
+                  <Typography color="error">{errorFraud}</Typography>
+                ) : fraudReports.length === 0 ? (
+                  <Typography color="text.secondary">Không có báo cáo gian lận nào.</Typography>
+                ) : (
+                  <Box sx={{ maxHeight: 350, overflowY: 'auto', pr: 1 }}>
+                    {fraudReports.map((r) => (
+                      <Paper
+                        key={r.transactionHash + '-' + r.reportIndex}
+                        sx={{ p: 3, mb: 4, minHeight: 110, background: '#fff', borderLeft: '4px solid #c0392b', display: 'flex', flexDirection: 'column', justifyContent: 'center', cursor: 'pointer', transition: 'box-shadow 0.2s', '&:hover': { boxShadow: 6 } }}
+                        onClick={() => { setSelectedFraudReport(r); setOpenFraudDetail(true); }}
+                      >
+                        <Stack direction="row" spacing={3} alignItems="flex-start" mb={1}>
+                          <Chip label={`ID: ${r.reportIndex}`} color="error" size="small" />
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography fontWeight={600} display="inline">Validator:</Typography>{' '}
+                            <Typography display="inline" sx={{ wordBreak: 'break-all', fontFamily: 'monospace' }}>{r.validator}</Typography>
+                          </Box>
+                        </Stack>
+                        <Stack direction="row" spacing={3} alignItems="center" mb={1}>
+                          <Typography fontWeight={600}>Reporter:</Typography>
+                          <Typography>{r.reporter}</Typography>
+                          <Typography fontWeight={600}>Evidence:</Typography>
+                          <Typography>{r.evidence}</Typography>
+                        </Stack>
+                        <Typography mt={1} variant="caption" color="text.secondary">Block: {r.blockNumber} | Tx: {r.transactionHash.slice(0, 10)}...</Typography>
+                      </Paper>
+                    ))}
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
+          </Box>
+
+        {/* Dialog chi tiết báo cáo gian lận */}
+        <Dialog open={openFraudDetail} onClose={() => setOpenFraudDetail(false)} maxWidth="sm" fullWidth>
+          <DialogTitle>
+            Chi tiết báo cáo gian lận
+            <IconButton aria-label="close" onClick={() => setOpenFraudDetail(false)} sx={{ position: 'absolute', right: 8, top: 8 }}>
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent dividers>
+            {selectedFraudReport ? (
+              <Stack spacing={2}>
+                <Typography><b>ID:</b> {selectedFraudReport.reportIndex}</Typography>
+                <Typography><b>Validator:</b> <span style={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>{selectedFraudReport.validator}</span></Typography>
+                <Typography><b>Reporter:</b> {selectedFraudReport.reporter}</Typography>
+                <Typography><b>Evidence:</b> {selectedFraudReport.evidence}</Typography>
+                <Typography><b>Block Number:</b> {selectedFraudReport.blockNumber}</Typography>
+                <Typography><b>Transaction Hash:</b> <span style={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>{selectedFraudReport.transactionHash}</span></Typography>
+                {fraudStatus && (
+                  <Typography color={fraudStatus.includes('thành công') ? 'success.main' : 'error.main'} sx={{ mt: 2, fontWeight: 600 }}>
+                    {fraudStatus}
+                  </Typography>
+                )}
+                <TextField
+                  label="Phán quyết (true/false)"
+                  value={fraudDecision}
+                  onChange={e => setFraudDecision(e.target.value)}
+                  size="small"
+                  fullWidth
+                  sx={{ mt: 2 }}
+                />
+              </Stack>
+            ) : null}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenFraudDetail(false)} color="primary">Đóng</Button>
+            {selectedFraudReport && (
+              <Button
+                color="error"
+                variant="contained"
+                onClick={handleResolveFraud}
+                sx={{ ml: 2 }}
+              >
+                Xử lý báo cáo gian lận
+              </Button>
+            )}
+          </DialogActions>
+        </Dialog>
         </Box>
 
         {/* Dialog chi tiết báo cáo mispricing */}
@@ -765,7 +840,7 @@ try {
                 <Typography><b>Actual Value:</b> {selectedReport.actualValue}</Typography>
                 <Typography><b>Block Number:</b> {selectedReport.blockNumber}</Typography>
                 <Typography><b>Transaction Hash:</b> <span style={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>{selectedReport.transactionHash}</span></Typography>
-                <Typography><b>Thời gian báo cáo:</b> {blockTimestamp ? blockTimestamp.toLocaleString() : 'Không xác định'}</Typography>
+                <Typography><b>Thời gian báo cáo:</b> {blockTimestamp ? blockTimestamp.toLocaleString() : <span style={{ color: '#888' }}>Không xác định</span>}</Typography>
                 {/* Hiển thị tổng số báo cáo mispricing */}
                 {mispricingCount !== null && (
                   <Typography color="info.main"><b>Tổng số báo cáo mispricing:</b> {mispricingCount}</Typography>
@@ -789,6 +864,7 @@ try {
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setOpenDetail(false)} color="primary">Đóng</Button>
+            {/* Đã bỏ button xác nhận phạt mispricing theo yêu cầu */}
           </DialogActions>
         </Dialog>
       </>
